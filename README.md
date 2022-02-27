@@ -17,7 +17,7 @@ The script [deploy-react-app-to-s3.sh](deploy-react-app-to-s3.sh) allows to buil
 
 The script assumes the following
 
-- The app is created with create-react-app - if not, at least the source code should be included in a `src` folder at project root, a `build` script should be part of `package.json`
+- The app is created with [create-react-app](https://reactjs.org/docs/create-a-new-react-app.html) - if not, at least the source code should be included in a `src` folder at project root, a `build` script should be part of `package.json`
 - The environment-related properties for the app are located in `src/environment.json`. Properties files for other environments should reside in `src` as well.
 
 The script requires the following parameters:
