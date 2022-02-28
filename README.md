@@ -7,7 +7,7 @@ This project includes a series of scripts and utils to simplify CI/CD processes,
 Deploying Spring Boot applications into AWS Elastic Beanstalk can be done simply by calling
 [deploy-spring-boot-app-to-ebs.sh](deploy-spring-boot-app-to-ebs.sh) 
 
-However, it requires the app to be properly configured. To configure an existing app just copy [config.yml](templates/elasticbeanstalk/config.yml) file into `.elasticbeankstalk/config.yml in your project and replace the variables with the concrete values for app, environment, etc.
+However, it requires the app to be properly configured. To configure an existing app just copy [config.yml](templates/elasticbeanstalk/config.yml) file into `.elasticbeankstalk/config.yml` in your project and replace the variables with the concrete values for app, environment, etc.
 
 Also, ensure that you have the [EBS CLI installed](https://docs.aws.amazon.com/elasticbeanstalk/latest/dg/eb-cli3-install.html)
 
@@ -19,6 +19,8 @@ The script assumes the following
 
 - The app is created with [create-react-app](https://reactjs.org/docs/create-a-new-react-app.html) - if not, at least the source code should be included in a `src` folder at project root, a `build` script should be part of `package.json`
 - The environment-related properties for the app are located in `src/environment.json`. Properties files for other environments should reside in `src` as well.
+
+A template invocation can be find on [templates/react-deploy-example.sh](templates/react-deploy-example.sh)
 
 The script requires the following parameters:
 
