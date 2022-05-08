@@ -12,10 +12,11 @@ cd $REACT_APP_PATH
 rm -rf build
 cp src/environment.json src/environment-backup.json
 cp src/$ENVIRONMENT_FILE src/environment.json
+echo "{\"version\": \"$(date '+%Y-%m-%d %H:%M:%S')\"}" > public/version.json # TODO to be replaced by automatic tagging script
 yarn install
 yarn build
 cp src/environment-backup.json src/environment.json
-rm -rf src/environment-backup.json
+rm -rf src/environment-backup.json public/version
 
 echo "[$(date)] Uploading file to S3"
 aws s3 sync build s3://$S3_BUCKET/ --acl public-read
