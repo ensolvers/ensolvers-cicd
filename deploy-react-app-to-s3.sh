@@ -16,7 +16,7 @@ echo "{\"version\": \"$(date '+%Y-%m-%d %H:%M:%S')\"}" > public/version.json # T
 yarn install
 yarn build
 cp src/environment-backup.json src/environment.json
-rm -rf src/environment-backup.json public/version
+rm -rf src/environment-backup.json public/version.json
 
 echo "[$(date)] Uploading file to S3"
 aws s3 sync build s3://$S3_BUCKET/ --acl public-read
