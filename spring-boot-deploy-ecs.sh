@@ -1,7 +1,7 @@
 #!/bin/bash
 
 #load utils
-source ./utils/slack_notification.sh
+source "`dirname "$0"`/utils/slack_notification.sh"
 
 TIME_DEPLOY=$(date +%s)
 LIST_APPS=("$1")
