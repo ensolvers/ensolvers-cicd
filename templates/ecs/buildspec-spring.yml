@@ -1,0 +1,34 @@
+# CodeBuild BuildSpec file, this will install all the tools needed to deploy the app
+
+version: 0.2
+
+env:
+  git-credential-helper: yes
+
+phases:
+  install:
+    runtime-versions:
+      java: corretto11
+
+  pre_build:
+    commands:
+      - curl -X POST -d "{'text':'[$(echo "$ENV" | tr '[:lower:]' '[:upper:]')] [$(date +"%H:%M:%S") UTC-3] - Deploy started by \`$CODEBUILD_INITIATOR\`'}" "$SLACK_WEBHOOK_URL"
+      - export MAVEN_CONFIG=''
+      - export _JAVA_OPTIONS=-Xmx12g
+      - export ROOT_DIR=$PWD
+      - |
+        if [ -z "$TAG" ]; then
+          build_source="$BRANCH"
+          sub_build_source="$SUBMODULE_BRANCH"
+        else
+          build_source="$TAG"
+          sub_build_source="$TAG"
+        fi
+      - git checkout $build_source
+      - sed -i "s|git@github.com:|https://github.com/|g" .gitmodules
+      - git submodule update --init --recursive
+      - git submodule foreach git checkout $sub_build_source
+
+  build:
+    commands:
+      - bash ./submodules/ensolvers-cicd/spring-boot-deploy-ecs.sh $APPS

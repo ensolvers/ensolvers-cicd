@@ -1,0 +1,34 @@
+[
+  {
+    "portMappings": [
+      {
+        "hostPort": $SERVER_PORT,
+        "protocol": "tcp",
+        "containerPort": $SERVER_PORT
+      }
+    ],
+    "logConfiguration": {
+      "logDriver": "awslogs",
+      "options": {
+        "awslogs-group": "$CLUSTER_NAME",
+        "awslogs-region": "$AWS_REGION",
+        "awslogs-stream-prefix": "$CLUSTER_NAME"
+      }
+    },
+    "environment": [
+      {
+        "name": "JAR_FILE_S3_URL",
+        "value": "$JAR_FILE_S3_URL"
+      }
+    ],
+    "secrets": [],
+    "ulimits": [],
+    "mountPoints": [],
+    "cpu": $VCPU,
+    "memoryReservation": $MEMORY,
+    "volumesFrom": [],
+    "image": "$DOCKER_IMAGE",
+    "essential": true,
+    "name": "webapp"
+  }
+]
