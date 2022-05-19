@@ -2,8 +2,8 @@
 set -eu
 
 BASEDIR=$(dirname "$0")
-APP_DIR=$1
-AWS_ENV_CONFIGURATION=$2
+APP_DIR=${1-""}
+AWS_ENV_CONFIGURATION=${2-""}
 
 if [ "$AWS_ENV_CONFIGURATION" != "-ignore-aws-env" ]; then
   $BASEDIR/utils/check-aws-env.sh
