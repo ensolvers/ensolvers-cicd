@@ -37,7 +37,7 @@ Required vars that you need to define for each env:
 
 4. For each build project created in ECS you need to configure the following environment vars:
    1. `ENV`: The environment (qa, prod, etc...).
-   2. `BRANCH`: branch of the base code that will be used to perform the build.
+   2. `BRANCH`/`TAG`: branch/tag of the base code that will be used to perform the build.
    3. `SLACK_WEBHOOK_URL`: optional. Specify a slack webhook url if you need to send notification to Slack.
    4. `KEY_ID`: KMS customer managed key to use to encrypt the build.
    5. `SUBMODULE_BRANCH`: branch of the submodules base code that will be used to perform the build.
