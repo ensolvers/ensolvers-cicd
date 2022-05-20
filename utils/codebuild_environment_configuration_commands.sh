@@ -7,7 +7,7 @@ source "$BASEDIR/slack_notification.sh"
 source "$BASEDIR/error_handler.sh"
 
 # Configure code base and submodules
-slack_notification "[$(echo "$ENV" | tr '[:lower:]' '[:upper:]')] [$(date +"%H:%M:%S") UTC-3] - Deploy started by \`$CODEBUILD_INITIATOR\`"
+slack_notification "[${ENV^^}] [$(date +"%H:%M:%S") UTC] - Deploy started by \`${CODEBUILD_INITIATOR}\`"
 
 echo "Configuring extra vars"
 export MAVEN_CONFIG=''
