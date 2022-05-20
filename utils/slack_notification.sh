@@ -3,7 +3,7 @@
 function slack_notification {
   TEXT=$1
 
-  if [ "$2" != "-ignore-echo" ]; then
+  if [ "${2:}" != "-ignore-echo" ]; then
     echo "${TEXT}"
   fi
 
