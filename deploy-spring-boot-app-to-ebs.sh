@@ -8,6 +8,7 @@ TIME_DEPLOY=$(date +%s)
 
 #load utils
 source "$BASEDIR/utils/slack_notification.sh"
+source "$BASEDIR/utils/error_handler.sh"
 
 if [ "$AWS_ENV_CONFIGURATION" != "-ignore-aws-vars" ]; then
   $BASEDIR/utils/check-aws-env.sh

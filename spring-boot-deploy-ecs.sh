@@ -1,8 +1,12 @@
 #!/bin/bash
 set -e
 
+BASEDIR=$(dirname "$0")
+
 #load utils
-source "`dirname "$0"`/utils/slack_notification.sh"
+source "$BASEDIR/utils/slack_notification.sh"
+source "$BASEDIR/utils/error_handler.sh"
+
 
 TIME_DEPLOY=$(date +%s)
 LIST_APPS=("$1")

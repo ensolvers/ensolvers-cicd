@@ -12,24 +12,8 @@ phases:
 
   pre_build:
     commands:
-      - git clone https://github.com/aws/aws-elastic-beanstalk-cli-setup.git
-      - python ./aws-elastic-beanstalk-cli-setup/scripts/ebcli_installer.py
-      - export PATH="/root/.ebcli-virtual-env/executables:$PATH"
-      - curl -X POST -d "{'text':'[$(echo "$ENV" | tr '[:lower:]' '[:upper:]')] [$(date +"%H:%M:%S") UTC-3] - Deploy started by \`$CODEBUILD_INITIATOR\`'}" "$SLACK_WEBHOOK_URL"
-      - export MAVEN_CONFIG=''
-      - export _JAVA_OPTIONS=-Xmx12g
-      - |
-        if [ -z "$TAG" ]; then
-          build_source="$BRANCH"
-          sub_build_source="$SUBMODULE_BRANCH"
-        else
-          build_source="$TAG"
-          sub_build_source="$TAG"
-        fi
-      - git checkout $build_source
-      - sed -i "s|git@github.com:|https://github.com/|g" .gitmodules
-      - git submodule update --init --recursive
-      - git submodule foreach git checkout $sub_build_source
+      - bash ./submodules/ensolvers-cicd/utils/codebuild_ebs_prebuild_commands.sh
+
   build:
     commands:
       - bash ./submodules/ensolvers-cicd/deploy-spring-boot-app-to-ebs.sh $MODULES -ignore-aws-vars
