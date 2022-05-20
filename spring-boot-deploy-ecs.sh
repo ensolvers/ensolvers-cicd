@@ -11,12 +11,12 @@ build_script="$ROOT_DIR/deploy/${ENV^^}-Var-Build.sh"
 source "$build_script"
 
 if [ -z "$TAG" ]; then
-  slack_notification "[${ENV^^}] [$(date +"%H:%M:%S") UTC-3] - Deploying ${BRANCH}"
+  slack_notification "[${ENV^^}] [$(date +"%H:%M:%S") UTC] - Deploying ${BRANCH}"
 else
-  slack_notification "[${ENV^^}] [$(date +"%H:%M:%S") UTC-3] - Deploying from tag ${TAG}"
+  slack_notification "[${ENV^^}] [$(date +"%H:%M:%S") UTC] - Deploying from tag ${TAG}"
 fi
 
-slack_notification "[${ENV^^}] [$(date +"%H:%M:%S") UTC-3] - Building for ${LIST_APPS[*]}"
+slack_notification "[${ENV^^}] [$(date +"%H:%M:%S") UTC] - Building for ${LIST_APPS[*]}"
 
 mvn clean package spring-boot:repackage -DskipTests
 
@@ -24,7 +24,7 @@ ERROR_CODE=$?
 
 if [ "$ERROR_CODE" -gt 0 ]
 then
-  slack_notification "[${ENV^^}] [$(date +"%H:%M:%S") UTC-3] - Building Failed - Error Code: $ERROR_CODE"
+  slack_notification "[${ENV^^}] [$(date +"%H:%M:%S") UTC] - Building Failed - Error Code: $ERROR_CODE"
   { exit 1; }
 fi
 
@@ -77,4 +77,4 @@ done
 
 TIME_FINAL=`expr $(date +%s) - $TIME_DEPLOY`
 
-slack_notification "[${ENV^^}] [$(date +"%H:%M:%S") UTC-3] - Deploy Finished - Took $((TIME_FINAL /60/60)) hours, $(((TIME_FINAL /60) % 60)) minutes, $((TIME_FINAL % 60)) seconds."
+slack_notification "[${ENV^^}] [$(date +"%H:%M:%S") UTC] - Deploy Finished - Took $((TIME_FINAL /60/60)) hours, $(((TIME_FINAL /60) % 60)) minutes, $((TIME_FINAL % 60)) seconds."

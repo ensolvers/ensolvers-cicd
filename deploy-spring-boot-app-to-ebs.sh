@@ -17,12 +17,12 @@ fi
 SIZE=${#MODULE_LIST[*]}
 
 if [ -z "$TAG" ]; then
-  slack_notification "[${ENV^^}] [$(date +"%H:%M:%S") UTC-3] - Deploying ${BRANCH}"
+  slack_notification "[${ENV^^}] [$(date +"%H:%M:%S") UTC] - Deploying \`${BRANCH}\`"
 else
-  slack_notification "[${ENV^^}] [$(date +"%H:%M:%S") UTC-3] - Deploying from tag ${TAG}"
+  slack_notification "[${ENV^^}] [$(date +"%H:%M:%S") UTC] - Deploying from tag \`${TAG}\`"
 fi
 
-slack_notification "[${ENV^^}] [$(date +"%H:%M:%S") UTC-3] - Building for ${MODULE_LIST[*]}"
+slack_notification "[${ENV^^}] [$(date +"%H:%M:%S") UTC] - Building for \`${MODULE_LIST[*]}\`"
 
 for (( i=0; i<SIZE; i++ ))
   do
@@ -40,7 +40,7 @@ for (( i=0; i<SIZE; i++ ))
 
   if [ "$ERROR_CODE" -gt 0 ]
   then
-    slack_notification "[${ENV^^}] [$(date +"%H:%M:%S") UTC-3] - Building Failed - Error Code: $ERROR_CODE"
+    slack_notification "[${ENV^^}] [$(date +"%H:%M:%S") UTC] - Building Failed - Error Code: $ERROR_CODE"
     { exit 1; }
   fi
 
@@ -48,10 +48,10 @@ for (( i=0; i<SIZE; i++ ))
   cd "modules/$MODULE_NAME"
   eb deploy --staged --verbose
 
-  slack_notification "[${ENV^^}] [$(date +"%H:%M:%S") UTC-3] - Module \`$MODULE_NAME\` deployed to EBS"
+  slack_notification "[${ENV^^}] [$(date +"%H:%M:%S") UTC] - Module \`$MODULE_NAME\` deployed to EBS"
 
   cd -
 done
 
 TIME_FINAL=`expr $(date +%s) - $TIME_DEPLOY`
-slack_notification "[${ENV^^}] [$(date +"%H:%M:%S") UTC-3] - Deploy Finished - Took $((TIME_FINAL /60/60)) hours, $(((TIME_FINAL /60) % 60)) minutes, $((TIME_FINAL % 60)) seconds."
+slack_notification "[${ENV^^}] [$(date +"%H:%M:%S") UTC] - Deploy Finished - Took $((TIME_FINAL /60/60)) hours, $(((TIME_FINAL /60) % 60)) minutes, $((TIME_FINAL % 60)) seconds."
