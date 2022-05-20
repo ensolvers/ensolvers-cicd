@@ -1,4 +1,5 @@
 #!/bin/bash
+set -e
 
 #load utils
 source "`dirname "$0"`/utils/slack_notification.sh"

@@ -9,7 +9,22 @@ Deploying Spring Boot applications into AWS Elastic Beanstalk can be done simply
 
 However, it requires the app to be properly configured. To configure an existing app just copy [config.yml](templates/elasticbeanstalk/config.yml) file into `.elasticbeankstalk/config.yml` in your project and replace the variables with the concrete values for app, environment, etc.
 
-Also, ensure that you have the [EBS CLI installed](https://docs.aws.amazon.com/elasticbeanstalk/latest/dg/eb-cli3-install.html)
+### Manual Deploy
+- Ensure that you have the [EBS CLI installed](https://docs.aws.amazon.com/elasticbeanstalk/latest/dg/eb-cli3-install.html)
+- Configure AWS user with env vars (`AWS_REGION`, `AWS_DEFAULT_REGION`, `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`)
+- From the root of your project call the script [deploy-spring-boot-app-to-ebs.sh](deploy-spring-boot-app-to-ebs.sh):
+  `bash submodules/ensolvers-cicd/deploy-spring-boot-app-to-ebs.sh <MODULE_NAME_TO_DEPLOY>`
+
+### Automatic Deploy
+You can automatize builds and deploys to EBS with a code build project:
+
+- Copy [buildspec-spring.yml](templates/elasticbeanstalk/buildspec-spring.yml) file to your project.
+- Create the project for the environment in codebuild, you will need to define the following env vars:
+  1. `ENV`: The environment (qa, prod, etc...).
+  2. `BRANCH`/`TAG`: branch/tag of the base code that will be used to perform the build.
+  3. `SLACK_WEBHOOK_URL`: Specify a slack webhook url to send notifications.
+  4. `SUBMODULE_BRANCH`: branch of the submodules base code that will be used to perform the build.
+  5. `MODULES`: space separated string. Each value in the list indicates the module that will be built and deployed to its corresponding EBS application.
 
 ## Spring Boot app deployment in AWS Elastic Container Service
 
