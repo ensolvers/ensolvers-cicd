@@ -11,4 +11,4 @@ python ./aws-elastic-beanstalk-cli-setup/scripts/ebcli_installer.py
 export PATH="/root/.ebcli-virtual-env/executables:$PATH"
 echo "EBS CLI installed"
 
-bash $BASEDIR/codebuild_environment_configuration_commands.sh
+source $BASEDIR/codebuild_environment_configuration_commands.sh
