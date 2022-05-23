@@ -87,12 +87,28 @@ The script assumes the following
 
 - The app is created with [create-react-app](https://reactjs.org/docs/create-a-new-react-app.html) - if not, at least the source code should be included in a `src` folder at project root, a `build` script should be part of `package.json`
 - The environment-related properties for the app are located in `src/environment.json`. Properties files for other environments should reside in `src` as well.
+- The module name (folder inside `modules/`) of the app will be passed to this script as an argument.
 
+### Manual Deploy
 A template invocation can be find on [templates/react-deploy-example.sh](templates/react-deploy-example.sh)
 
 The script requires the following parameters:
 
-- `REACT_APP_PATH`: Path of the root folder of the React app
 - `ENVIRONMENT_FILE`:  Name of the environment file to used (it should be within `src` at the same level than `environment.json`)
 - `S3_BUCKET`: Name of the bucket in which the app will be deployed
 - `CLOUDFRONT_DISTRIBUTION_ID`: ID of the Cloudfront distribution that takes the S3 bucket as a source
+- The module name (folder inside `modules/`) of the app should be passed to `deploy-react-app-to-s3.sh` script as an argument.
+
+### Automatic Deploy
+You can automatize builds and deploys to s3 with a code build project:
+
+- Copy [buildspec-react.yml](templates/buildspec-react.yml) file to your project.
+- Create the project for the environment in codebuild, you will need to define the following env vars:
+    1. `ENV`: the environment (qa, prod, etc...).
+    2. `BRANCH`/`TAG`: branch/tag of the base code that will be used to perform the build.
+    3. `SLACK_WEBHOOK_URL`: specify a slack webhook url to send notifications.
+    4. `SUBMODULE_BRANCH`: branch of the submodules base code that will be used to perform the build.
+    5. `MODULE`: the module name (folder inside `modules/`) of the app.
+    6. `ENVIRONMENT_FILE`:  Name of the environment file to used (it should be within `src` at the same level than `environment.json`).
+    7. `S3_BUCKET`: Name of the bucket in which the app will be deployed.
+    8. `CLOUDFRONT_DISTRIBUTION_ID`: ID of the Cloudfront distribution that takes the S3 bucket as a source.

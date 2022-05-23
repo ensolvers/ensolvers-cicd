@@ -1,0 +1,21 @@
+version: 0.2
+
+env:
+  git-credential-helper: yes
+
+phases:
+  install:
+    runtime-versions:
+      nodejs: 14
+    commands:
+      - npm i -g corepack
+
+  pre_build:
+    commands:
+      - sed -i "s|git@github.com:|https://github.com/|g" .gitmodules
+      - git submodule update --init --recursive
+      - bash ./submodules/ensolvers-cicd/utils/codebuild_environment_configuration_commands.sh
+
+  build:
+    commands:
+      - bash ./submodules/ensolvers-cicd/deploy-react-app-to-s3.sh $MODULE -ignore-aws-vars
