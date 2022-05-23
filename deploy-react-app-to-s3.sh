@@ -2,7 +2,7 @@
 set -eu
 
 BASEDIR=$(dirname "$0")
-MODULE_NAME=("$1")
+APP_PATH=("$1")
 AWS_ENV_CONFIGURATION=${2-""}
 TIME_DEPLOY=$(date +%s)
 
@@ -23,10 +23,10 @@ else
   slack_notification "[${ENV^^}] [$(date +"%H:%M:%S") UTC][FRONTEND] - Deploying from tag \`${TAG}\`"
 fi
 
-slack_notification "[${ENV^^}] [$(date +"%H:%M:%S") UTC][FRONTEND] - Building for \`${MODULE_NAME}\`"
+slack_notification "[${ENV^^}] [$(date +"%H:%M:%S") UTC][FRONTEND] - Building for \`${APP_PATH}\`"
 
 echo "[$(date)] Building app..."
-cd "modules/$MODULE_NAME"
+cd "$APP_PATH"
 rm -rf build
 cp src/environment.json src/environment-backup.json
 cp src/$ENVIRONMENT_FILE src/environment.json

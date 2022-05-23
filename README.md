@@ -16,12 +16,12 @@ However, it requires the app to be properly configured. To configure an existing
   `bash submodules/ensolvers-cicd/deploy-spring-boot-app-to-ebs.sh <MODULE_NAME_TO_DEPLOY>`
 
 ### Automatic Deploy
-You can automatize builds and deploys to EBS with a code build project:
+You can automate builds and deploys to EBS with a code build project:
 
 - Copy [buildspec-spring.yml](templates/elasticbeanstalk/buildspec-spring.yml) file to your project.
 - Create the project for the environment in codebuild, you will need to define the following env vars:
   1. `ENV`: The environment (qa, prod, etc...).
-  2. `BRANCH`/`TAG`: branch/tag of the base code that will be used to perform the build.
+  2. `BRANCH`/`TAG`: branch/tag of the base code that will be used to perform the build, by default it will use master.
   3. `SLACK_WEBHOOK_URL`: Specify a slack webhook url to send notifications.
   4. `SUBMODULE_BRANCH`: branch of the submodules base code that will be used to perform the build.
   5. `MODULES`: space separated string. Each value in the list indicates the module that will be built and deployed to its corresponding EBS application.
@@ -52,7 +52,7 @@ Required vars that you need to define for each env:
 
 4. For each build project created in ECS you need to configure the following environment vars:
    1. `ENV`: The environment (qa, prod, etc...).
-   2. `BRANCH`/`TAG`: branch/tag of the base code that will be used to perform the build.
+   2. `BRANCH`/`TAG`: branch/tag of the base code that will be used to perform the build, by default it will use master.
    3. `SLACK_WEBHOOK_URL`: optional. Specify a slack webhook url if you need to send notification to Slack.
    4. `KEY_ID`: KMS customer managed key to use to encrypt the build.
    5. `SUBMODULE_BRANCH`: branch of the submodules base code that will be used to perform the build.
@@ -100,15 +100,15 @@ The script requires the following parameters:
 - The module name (folder inside `modules/`) of the app should be passed to `deploy-react-app-to-s3.sh` script as an argument.
 
 ### Automatic Deploy
-You can automatize builds and deploys to s3 with a code build project:
+You can automate builds and deploys to s3 with a code build project:
 
 - Copy [buildspec-react.yml](templates/buildspec-react.yml) file to your project.
 - Create the project for the environment in codebuild, you will need to define the following env vars:
     1. `ENV`: the environment (qa, prod, etc...).
-    2. `BRANCH`/`TAG`: branch/tag of the base code that will be used to perform the build.
+    2. `BRANCH`/`TAG`: branch/tag of the base code that will be used to perform the build, by default it will use master.
     3. `SLACK_WEBHOOK_URL`: specify a slack webhook url to send notifications.
     4. `SUBMODULE_BRANCH`: branch of the submodules base code that will be used to perform the build.
-    5. `MODULE`: the module name (folder inside `modules/`) of the app.
+    5. `REACT_APP_PATH`: Path of the root folder of the React app
     6. `ENVIRONMENT_FILE`:  Name of the environment file to used (it should be within `src` at the same level than `environment.json`).
     7. `S3_BUCKET`: Name of the bucket in which the app will be deployed.
     8. `CLOUDFRONT_DISTRIBUTION_ID`: ID of the Cloudfront distribution that takes the S3 bucket as a source.
