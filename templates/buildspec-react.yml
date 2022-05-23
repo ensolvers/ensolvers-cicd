@@ -7,8 +7,6 @@ phases:
   install:
     runtime-versions:
       nodejs: 14
-    commands:
-      - npm i -g corepack
 
   pre_build:
     commands:
