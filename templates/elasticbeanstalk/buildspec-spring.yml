@@ -18,4 +18,4 @@ phases:
 
   build:
     commands:
-      - bash ./submodules/ensolvers-cicd/deploy-spring-boot-app-to-ebs.sh $MODULES -ignore-aws-vars
+      - bash ./submodules/ensolvers-cicd/deploy-spring-boot-app-to-ebs.sh $MODULES --ignore-aws-vars

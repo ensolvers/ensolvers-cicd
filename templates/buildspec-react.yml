@@ -16,4 +16,4 @@ phases:
 
   build:
     commands:
-      - bash ./submodules/ensolvers-cicd/deploy-react-app-to-s3.sh $REACT_APP_PATH -ignore-aws-vars
+      - bash ./submodules/ensolvers-cicd/deploy-react-app-to-s3.sh $REACT_APP_PATH --ignore-aws-vars
