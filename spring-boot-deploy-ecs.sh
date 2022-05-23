@@ -5,7 +5,7 @@ BASEDIR=$(dirname "$0")
 
 #load utils
 source "$BASEDIR/utils/slack_notification.sh"
-source "$BASEDIR/utils/error_handler.sh"
+source "$BASEDIR/utils/error_handler_slack_message.sh"
 
 
 TIME_DEPLOY=$(date +%s)

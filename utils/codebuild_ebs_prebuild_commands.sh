@@ -2,7 +2,7 @@ set -e
 
 BASEDIR=$(dirname "$0")
 
-source "$BASEDIR/error_handler.sh"
+source "$BASEDIR/error_handler_slack_message.sh"
 
 # Install ebs cli
 echo "Installing EBS CLI..."
