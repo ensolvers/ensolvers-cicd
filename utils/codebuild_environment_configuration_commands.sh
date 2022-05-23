@@ -17,9 +17,11 @@ echo "Extra vars configured"
 
 echo "Configuring branch/tag"
 if [ -z "$TAG" ]; then
+  echo "Branch: $BRANCH. Submodule branch: $SUBMODULE_BRANCH"
   build_source="$BRANCH"
   sub_build_source="$SUBMODULE_BRANCH"
 else
+  echo "TAG: $TAG"
   build_source="$TAG"
   sub_build_source="$TAG"
 fi
