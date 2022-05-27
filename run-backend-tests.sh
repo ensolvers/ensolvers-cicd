@@ -12,13 +12,13 @@ fi
 
 if [ -z "$APPLICATION_PROPERTIES_PATH" ]
 then
-  echo "Env variable not defined: APPLICATION_PROPERTIES_PATH"
+  slack_notification "[TEST-RUNNER] :alert-red: Env variable not defined: APPLICATION_PROPERTIES_PATH :alert-red:"
   exit 1
 fi
 
 if [ -z "$REPORTS_DIR" ]
 then
-  echo "Env variable not defined: REPORTS_DIR"
+  slack_notification "[TEST-RUNNER] :alert-red: Env variable not defined: REPORTS_DIR :alert-red:"
   exit 1
 fi
 
