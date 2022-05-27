@@ -4,6 +4,11 @@ BASEDIR=$(dirname "$0")
 APPLICATION_PROPERTIES_PATH=$1
 REPORTS_DIR=$2
 
+if [ -z "$SLACK_WEBHOOK_URL" ]
+then
+  echo "Env variable not defined: SLACK_WEBHOOK_URL"
+  exit 1
+fi
 
 if [ -z "$APPLICATION_PROPERTIES_PATH" ]
 then
