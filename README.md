@@ -112,3 +112,20 @@ You can automate builds and deploys to s3 with a code build project:
     6. `ENVIRONMENT_FILE`:  Name of the environment file to used (it should be within `src` at the same level than `environment.json`).
     7. `S3_BUCKET`: Name of the bucket in which the app will be deployed.
     8. `CLOUDFRONT_DISTRIBUTION_ID`: ID of the Cloudfront distribution that takes the S3 bucket as a source.
+
+## Automatic backend tests
+You can automate test execution using [run-backend-tests.sh](run-backend-tests.sh) (uses test containers).
+
+Just call this script from **your root project** directory passing it two parameters:
+
+- Path to application properties.
+- Path to test reports folder
+
+Additionally, you can define the env variable `SLACK_WEBHOOK_URL` to send results to slack.
+
+Example:
+```
+APP_PROPERTIES_PATH=./modules/simple-app-backend/src/test/resources/application.properties
+REPORTS_PATH=./modules/simple-app-backend/target/surefire-reports
+bash ./submodules/ensolvers-cicd/run-backend-tests.sh $APP_PROPERTIES_PATH $REPORTS_PATH
+```
