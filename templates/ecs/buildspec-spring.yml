@@ -12,6 +12,9 @@ phases:
 
   pre_build:
     commands:
+      - export MAVEN_CONFIG=''
+      - export _JAVA_OPTIONS=-Xmx12g
+      - export ROOT_DIR=$PWD
       - sed -i "s|git@github.com:|https://github.com/|g" .gitmodules
       - git submodule update --init --recursive
       - bash ./submodules/ensolvers-cicd/utils/codebuild_environment_configuration_commands.sh
