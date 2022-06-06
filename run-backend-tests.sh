@@ -3,16 +3,23 @@
 BASEDIR=$(dirname "$0")
 APPLICATION_PROPERTIES_PATH=$1
 REPORTS_DIR=$2
+PACKAGE_NAME=$3
 
 if [ -z "$APPLICATION_PROPERTIES_PATH" ]
 then
-  slack_notification "[TEST-RUNNER] :alert-red: Env variable not defined: APPLICATION_PROPERTIES_PATH :alert-red:"
+  slack_notification "[TEST-RUNNER] :alert-red: Parameter not defined: APPLICATION_PROPERTIES_PATH :alert-red:"
   exit 1
 fi
 
 if [ -z "$REPORTS_DIR" ]
 then
-  slack_notification "[TEST-RUNNER] :alert-red: Env variable not defined: REPORTS_DIR :alert-red:"
+  slack_notification "[TEST-RUNNER] :alert-red: Parameter not defined: REPORTS_DIR :alert-red:"
+  exit 1
+fi
+
+if [ -z "$PACKAGE_NAME" ]
+then
+  slack_notification "[TEST-RUNNER] :alert-red: Parameter not defined: PACKAGE_NAME :alert-red:"
   exit 1
 fi
 
@@ -43,7 +50,7 @@ fi
 
 #run tests
 echo "Running tests"
-mvn -B test
+mvn test -Dtest="$PACKAGE_NAME".**.* -DfailIfNoTests=false
 ERROR_CODE=$?
 if [ $ERROR_CODE -ne 0 ]
 then

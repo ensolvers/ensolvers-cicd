@@ -120,6 +120,7 @@ Just call this script from **your root project** directory passing it two parame
 
 - Path to application properties.
 - Path to test reports folder
+- Base package to scan
 
 Additionally, you can define the env variable `SLACK_WEBHOOK_URL` to send results to slack.
 
@@ -127,5 +128,6 @@ Example:
 ```
 APP_PROPERTIES_PATH=./modules/simple-app-backend/src/test/resources/application.properties
 REPORTS_PATH=./modules/simple-app-backend/target/surefire-reports
+PACKAGE_NAME=com.simple.app
 bash ./submodules/ensolvers-cicd/run-backend-tests.sh $APP_PROPERTIES_PATH $REPORTS_PATH
 ```
