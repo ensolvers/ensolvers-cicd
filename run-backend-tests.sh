@@ -5,6 +5,9 @@ APPLICATION_PROPERTIES_PATH=$1
 REPORTS_DIR=$2
 PACKAGE_NAME=$3
 
+#load utils
+source "$BASEDIR/utils/slack_notification.sh"
+
 if [ -z "$APPLICATION_PROPERTIES_PATH" ]
 then
   slack_notification "[TEST-RUNNER] :alert-red: Parameter not defined: APPLICATION_PROPERTIES_PATH :alert-red:"
@@ -22,9 +25,6 @@ then
   slack_notification "[TEST-RUNNER] :alert-red: Parameter not defined: PACKAGE_NAME :alert-red:"
   exit 1
 fi
-
-#load utils
-source "$BASEDIR/utils/slack_notification.sh"
 
 slack_notification "[TEST-RUNNER] [$(date +"%H:%M:%S") UTC] - Running Tests..."
 
