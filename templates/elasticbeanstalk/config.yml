@@ -3,7 +3,7 @@ branch-defaults:
     environment: ${ENVIRONMENT_NAME}
     group_suffix: null
 deploy:
-  artifact: ${ARTIFACT_NAME}
+  artifact: target/ebs_app.zip
 global:
   application_name: ${APPLICATION_NAME}
   branch: null

@@ -48,6 +48,16 @@ for (( i=0; i<SIZE; i++ ))
 
   echo "[$(date)] Deploying to Elastic Beanstalk..."
   cd "modules/$MODULE_NAME"
+
+  # Build and normalize jar name - assuming only one output jar
+  rm target/*.original
+  mv target/*.jar target/spring_boot_app.jar
+
+  # Build .zip to deploy
+  zip -j target/ebs_app.zip target/spring_boot_app.jar
+  zip -ru target/ebs_app.zip .ebextensions
+
+  # Deploy
   eb deploy --staged --verbose
 
   slack_notification "[${ENV^^}] [$(date +"%H:%M:%S") UTC] - Module \`$MODULE_NAME\` deployed to EBS"
