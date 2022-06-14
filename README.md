@@ -131,3 +131,7 @@ REPORTS_PATH=./modules/simple-app-backend/target/surefire-reports
 PACKAGE_NAME=com.simple.app
 bash ./submodules/ensolvers-cicd/run-backend-tests.sh $APP_PROPERTIES_PATH $REPORTS_PATH
 ```
+
+## Other useful guides / how-tos
+
+* [New Relic integration in AWS Elastic Beanstalk](docs/New_Relic_Integration_EBS.md)
