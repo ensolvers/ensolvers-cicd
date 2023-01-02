@@ -1,14 +1,32 @@
 #!/bin/bash
 set -eu
-BASEDIR=$(dirname "$0")
 
-$BASEDIR/utils/check-aws-env.sh
+BASEDIR=$(dirname "$0")
+APP_PATH=("$1")
+AWS_ENV_CONFIGURATION=${2-""}
+TIME_DEPLOY=$(date +%s)
+
+#load utils
+source "$BASEDIR/utils/slack_notification.sh"
+source "$BASEDIR/utils/error_handler_slack_message.sh"
+
+if [ "$AWS_ENV_CONFIGURATION" != "--ignore-aws-vars" ]; then
+  $BASEDIR/utils/check-aws-env.sh
+fi
 
 # Checks required vars
-: $REACT_APP_PATH $ENVIRONMENT_FILE $S3_BUCKET $CLOUDFRONT_DISTRIBUTION_ID
+: $ENVIRONMENT_FILE $S3_BUCKET $CLOUDFRONT_DISTRIBUTION_ID
+
+if [ -z "$TAG" ]; then
+  slack_notification "[${ENV^^}] [$(date +"%H:%M:%S") UTC][FRONTEND] - Deploying \`${BRANCH}\`"
+else
+  slack_notification "[${ENV^^}] [$(date +"%H:%M:%S") UTC][FRONTEND] - Deploying from tag \`${TAG}\`"
+fi
+
+slack_notification "[${ENV^^}] [$(date +"%H:%M:%S") UTC][FRONTEND] - Building for \`${APP_PATH}\`"
 
 echo "[$(date)] Building app..."
-cd $REACT_APP_PATH
+cd "$APP_PATH"
 rm -rf build
 cp src/environment.json src/environment-backup.json
 cp src/$ENVIRONMENT_FILE src/environment.json
@@ -23,3 +41,6 @@ aws s3 sync build s3://$S3_BUCKET/ --acl public-read
 
 echo "[$(date)] Triggering CF distribution invalidation"
 aws cloudfront create-invalidation --distribution-id $CLOUDFRONT_DISTRIBUTION_ID --paths "/*"
+
+TIME_FINAL=`expr $(date +%s) - $TIME_DEPLOY`
+slack_notification "[${ENV^^}] [$(date +"%H:%M:%S") UTC][FRONTEND] - Deploy Finished - Took $((TIME_FINAL /60/60)) hours, $(((TIME_FINAL /60) % 60)) minutes, $((TIME_FINAL % 60)) seconds."

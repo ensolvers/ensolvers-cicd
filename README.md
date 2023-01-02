@@ -9,7 +9,22 @@ Deploying Spring Boot applications into AWS Elastic Beanstalk can be done simply
 
 However, it requires the app to be properly configured. To configure an existing app just copy [config.yml](templates/elasticbeanstalk/config.yml) file into `.elasticbeankstalk/config.yml` in your project and replace the variables with the concrete values for app, environment, etc.
 
-Also, ensure that you have the [EBS CLI installed](https://docs.aws.amazon.com/elasticbeanstalk/latest/dg/eb-cli3-install.html)
+### Manual Deploy
+- Ensure that you have the [EBS CLI installed](https://docs.aws.amazon.com/elasticbeanstalk/latest/dg/eb-cli3-install.html)
+- Configure AWS user with env vars (`AWS_REGION`, `AWS_DEFAULT_REGION`, `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`)
+- From the root of your project call the script [deploy-spring-boot-app-to-ebs.sh](deploy-spring-boot-app-to-ebs.sh):
+  `bash submodules/ensolvers-cicd/deploy-spring-boot-app-to-ebs.sh <MODULE_NAME_TO_DEPLOY>`
+
+### Automatic Deploy
+You can automate builds and deploys to EBS with a code build project:
+
+- Copy [buildspec-spring.yml](templates/elasticbeanstalk/buildspec-spring.yml) file to your project.
+- Create the project for the environment in codebuild, you will need to define the following env vars:
+  1. `ENV`: The environment (qa, prod, etc...).
+  2. `BRANCH`/`TAG`: branch/tag of the base code that will be used to perform the build, by default it will use master.
+  3. `SLACK_WEBHOOK_URL`: Specify a slack webhook url to send notifications.
+  4. `SUBMODULE_BRANCH`: branch of the submodules base code that will be used to perform the build.
+  5. `MODULES`: space separated string. Each value in the list indicates the module that will be built and deployed to its corresponding EBS application.
 
 ## Spring Boot app deployment in AWS Elastic Container Service
 
@@ -37,7 +52,7 @@ Required vars that you need to define for each env:
 
 4. For each build project created in ECS you need to configure the following environment vars:
    1. `ENV`: The environment (qa, prod, etc...).
-   2. `BRANCH`: branch of the base code that will be used to perform the build.
+   2. `BRANCH`/`TAG`: branch/tag of the base code that will be used to perform the build, by default it will use master.
    3. `SLACK_WEBHOOK_URL`: optional. Specify a slack webhook url if you need to send notification to Slack.
    4. `KEY_ID`: KMS customer managed key to use to encrypt the build.
    5. `SUBMODULE_BRANCH`: branch of the submodules base code that will be used to perform the build.
@@ -72,12 +87,51 @@ The script assumes the following
 
 - The app is created with [create-react-app](https://reactjs.org/docs/create-a-new-react-app.html) - if not, at least the source code should be included in a `src` folder at project root, a `build` script should be part of `package.json`
 - The environment-related properties for the app are located in `src/environment.json`. Properties files for other environments should reside in `src` as well.
+- The module name (folder inside `modules/`) of the app will be passed to this script as an argument.
 
+### Manual Deploy
 A template invocation can be find on [templates/react-deploy-example.sh](templates/react-deploy-example.sh)
 
 The script requires the following parameters:
 
-- `REACT_APP_PATH`: Path of the root folder of the React app
 - `ENVIRONMENT_FILE`:  Name of the environment file to used (it should be within `src` at the same level than `environment.json`)
 - `S3_BUCKET`: Name of the bucket in which the app will be deployed
 - `CLOUDFRONT_DISTRIBUTION_ID`: ID of the Cloudfront distribution that takes the S3 bucket as a source
+- The module name (folder inside `modules/`) of the app should be passed to `deploy-react-app-to-s3.sh` script as an argument.
+
+### Automatic Deploy
+You can automate builds and deploys to s3 with a code build project:
+
+- Copy [buildspec-react.yml](templates/buildspec-react.yml) file to your project.
+- Create the project for the environment in codebuild, you will need to define the following env vars:
+    1. `ENV`: the environment (qa, prod, etc...).
+    2. `BRANCH`/`TAG`: branch/tag of the base code that will be used to perform the build, by default it will use master.
+    3. `SLACK_WEBHOOK_URL`: specify a slack webhook url to send notifications.
+    4. `SUBMODULE_BRANCH`: branch of the submodules base code that will be used to perform the build.
+    5. `REACT_APP_PATH`: Path of the root folder of the React app
+    6. `ENVIRONMENT_FILE`:  Name of the environment file to used (it should be within `src` at the same level than `environment.json`).
+    7. `S3_BUCKET`: Name of the bucket in which the app will be deployed.
+    8. `CLOUDFRONT_DISTRIBUTION_ID`: ID of the Cloudfront distribution that takes the S3 bucket as a source.
+
+## Automatic backend tests
+You can automate test execution using [run-backend-tests.sh](run-backend-tests.sh) (uses test containers).
+
+Just call this script from **your root project** directory passing it two parameters:
+
+- Path to application properties.
+- Path to test reports folder
+- Base package to scan
+
+Additionally, you can define the env variable `SLACK_WEBHOOK_URL` to send results to slack.
+
+Example:
+```
+APP_PROPERTIES_PATH=./modules/simple-app-backend/src/test/resources/application.properties
+REPORTS_PATH=./modules/simple-app-backend/target/surefire-reports
+PACKAGE_NAME=com.simple.app
+bash ./submodules/ensolvers-cicd/run-backend-tests.sh $APP_PROPERTIES_PATH $REPORTS_PATH
+```
+
+## Other useful guides / how-tos
+
+* [New Relic integration in AWS Elastic Beanstalk](docs/New_Relic_Integration_EBS.md)
