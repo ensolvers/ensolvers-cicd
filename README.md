@@ -42,7 +42,8 @@ However, it requires the app to be properly configured. To configure an existing
 3. For each environment you need to define a script in `deploy` directory, named `<ENV>-Var-Build.sh`. This script will set the corresponding environment variables for the defined `ENV`. 
 Required vars that you need to define for each env:
    1. `ECS_TASK_EXECUTION_ROLE`: The role that the ECS task instance will use.
-   2. `DOCKER_IMAGE`: The image of the container were the task instance will run (probably you will need to build an upload a custom image to aws ecr).
+   2. `DOCKER_IMAGE`: The image of the container were the task instance will run (probably you will need to build an upload a custom image to aws ecr). In this case, we will probably use 
+   `docker-jar-runner`, check [Docker Images](docker/README.md) documentation
    3. `AWS_REGION`: AWS region of the ECS cluster where the task will be deployed.
    4. `S3_BUCKET_NAME`: S3 bucket where the generated jar will be uploaded.
    5. `AWS_SECRET_MANAGER_SECRET_ARN`: Optional. Define this var if you need to use `secrets` section in task definition file. Example at the end of this section.

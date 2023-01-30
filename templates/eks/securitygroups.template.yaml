@@ -1,0 +1,31 @@
+---
+AWSTemplateFormatVersion: '2010-09-09'
+Description: >
+
+  This Template should bind together all the needed configuration between Security Groups. As many parameters as SG to configure should be created. The simple example will pressume a cache connection.
+
+
+Parameters:
+  VPC:
+    Type: String
+  EKSClusterSecurityGroup:
+    Type: String
+
+Resources:
+
+  ElasticacheSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      VpcId:
+        Ref: VPC
+      GroupDescription: Security group for the shared storage
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: '6379'
+          ToPort: '6379'
+          SourceSecurityGroupId: !Ref EKSClusterSecurityGroup
+
+Outputs:
+  ElasticacheSecurityGroup:
+    Description: A reference to the created SG for Elasticache
+    Value: !Ref ElasticacheSecurityGroup

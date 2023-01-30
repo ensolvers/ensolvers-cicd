@@ -1,0 +1,28 @@
+---
+AWSTemplateFormatVersion: '2010-09-09'
+Description: >
+
+  This Template creates a bucket where to gather all the templates that could be deployed by the main template in Cf. If the project won't use a centralized deploy, it's not needed to deploy this template on CF.
+
+Resources:
+
+  SourcesBucket:
+    Type: AWS::S3::Bucket
+    Description: This is the S3 Bucket Archive for the CF Template files
+    DeletionPolicy: Delete
+    Properties:
+      VersioningConfiguration:
+        Status: Enabled
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: AES256
+
+Outputs:
+
+  SourcesBucketName:
+    Description: Name of the bootstrap bucket for the Workshop
+    Value:
+      Ref: SourcesBucket
+    Export:
+      Name: !Sub "${AWS::StackName}-SourceBucketName"
