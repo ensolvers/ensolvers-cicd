@@ -1,20 +1,20 @@
 ---
 AWSTemplateFormatVersion: '2010-09-09'
 
-Description: >
-
-  This Template defines the EKS minimum infrastructure to work. A Node instance and the size sets are defined.
 
 Parameters:
   VPC:
     Description: VPC
-    Type: String
-  PublicSubnets:
-    Description:  Public Subnets
-    Type: CommaDelimitedList
-  PrivateSubnets:
-    Description:  Private Subnets
-    Type: CommaDelimitedList
+    Type: AWS::EC2::VPC::Id
+  PrivateSubnet1:
+    Description:  Private Subnet 1
+    Type: AWS::EC2::Subnet::Id
+  PrivateSubnet2:
+    Description:  Private Subnet 2
+    Type: AWS::EC2::Subnet::Id
+  PrivateSubnet3:
+    Description:  Private Subnet 3
+    Type: AWS::EC2::Subnet::Id
   EKSWorkerNodeInstanceType:
     Description: Instance type for the worker nodes
     Type: String
@@ -81,6 +81,23 @@ Resources:
         - arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore
       Path: /
 
+  EKSNodeInstanceRole:
+    Type: "AWS::IAM::Role"
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - !FindInMap [ServicePrincipals, !Ref "AWS::Partition", ec2]
+            Action:
+              - "sts:AssumeRole"
+      ManagedPolicyArns:
+        - !Sub "arn:${AWS::Partition}:iam::aws:policy/AmazonEKSFargatePodExecutionRolePolicy"
+        - arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore
+      Path: /
+
   EKSCluster:
     Type: AWS::EKS::Cluster
     Properties:
@@ -89,9 +106,9 @@ Resources:
         SecurityGroupIds:
           - !Ref EKSControlPlaneSecurityGroup
         SubnetIds:
-          - !Select [0, !Ref PrivateSubnets]
-          - !Select [1, !Ref PrivateSubnets]
-          - !Select [2, !Ref PrivateSubnets]
+          - !Ref PrivateSubnet1
+          - !Ref PrivateSubnet2
+          - !Ref PrivateSubnet3
       RoleArn: !GetAtt EKSClusterRole.Arn
       Version: 1.18
 
@@ -108,9 +125,9 @@ Resources:
         MaxSize: !Ref EKSNodeGroupMaxSize
         MinSize: !Ref EKSNodeGroupMinSize
       Subnets:
-        - !Select [0, !Ref PrivateSubnets]
-        - !Select [1, !Ref PrivateSubnets]
-        - !Select [2, !Ref PrivateSubnets]
+        - !Ref PrivateSubnet1
+        - !Ref PrivateSubnet2
+        - !Ref PrivateSubnet3
 
 Outputs:
   EKSClusterSecurityGroup:
@@ -118,6 +135,3 @@ Outputs:
     Value: !GetAtt EKSCluster.ClusterSecurityGroupId
   EKSClusterName:
     Description: EKS Cluster Name
-    Value: !Ref EKSCluster
-    Export:
-      Name: !Join [ ":", [ !Ref "AWS::StackName", EKSClusterName ] ]
