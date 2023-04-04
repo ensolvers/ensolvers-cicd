@@ -30,7 +30,8 @@ slack_notification "[TEST-RUNNER] [$(date +"%H:%M:%S") UTC] - Running Tests..."
 
 #set testcontainers
 echo "Configuring test containers"
-printf "\ntestcontainers.db.engine=mysql" >> $APPLICATION_PROPERTIES_PATH
+printf "\ntestcontainers.db.engine=\${TEST_CONTAINERS_DB_ENGINE:mysql}" >> $APPLICATION_PROPERTIES_PATH
+printf "\ntestcontainers.redis.enabled=\${TEST_CONTAINERS_REDIS_ENABLED:false}" >> $APPLICATION_PROPERTIES_PATH
 ERROR_CODE=$?
 if [ $ERROR_CODE -ne 0 ]
 then
