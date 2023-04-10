@@ -11,7 +11,7 @@ slack_notification "[${ENV^^}] [$(date +"%H:%M:%S") UTC] - Deploy started by \`$
 
 echo "Branch configured: [$BRANCH]"
 
-git checkout $build_source
+git checkout $BRANCH
 
 # Use HTTPS instead of SSH since env setup is simpler
 sed -i "s|git@github.com:|https://github.com/|g" .gitmodules
