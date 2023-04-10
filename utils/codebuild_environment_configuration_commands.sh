@@ -9,21 +9,10 @@ source "$BASEDIR/error_handler_slack_message.sh"
 # Configure code base and submodules
 slack_notification "[${ENV^^}] [$(date +"%H:%M:%S") UTC] - Deploy started by \`${CODEBUILD_INITIATOR}\`"
 
-echo "Configuring branch/tag"
-if [ -z "$TAG" ]; then
-  echo "Branch: $BRANCH. Submodule branch: $SUBMODULE_BRANCH"
-  build_source="$BRANCH"
-  sub_build_source="$SUBMODULE_BRANCH"
-else
-  echo "TAG: $TAG"
-  build_source="$TAG"
-  sub_build_source="$TAG"
-fi
-echo "Branch/tag configured"
+echo "Branch configured: [$BRANCH]"
 
-echo "Configuring submodules"
 git checkout $build_source
+
+# Use HTTPS instead of SSH since env setup is simpler
 sed -i "s|git@github.com:|https://github.com/|g" .gitmodules
 git submodule update --init --recursive
-git submodule foreach git checkout $sub_build_source
-echo "Submodules configured"
