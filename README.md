@@ -138,7 +138,23 @@ Example:
 APP_PROPERTIES_PATH=./modules/simple-app-backend/src/test/resources/application.properties
 REPORTS_PATH=./modules/simple-app-backend/target/surefire-reports
 PACKAGE_NAME=com.simple.app
-bash ./submodules/ensolvers-cicd/run-backend-tests.sh $APP_PROPERTIES_PATH $REPORTS_PATH
+bash ./submodules/ensolvers-cicd/run-backend-tests.sh $APP_PROPERTIES_PATH $REPORTS_PATH $PACKAGE_NAME
+```
+
+Now, if you want to add reports in Sonar to the project, there are two more parameters that you can add.
+
+Follow this doc to understand how to include Sonar to the project, but once that's done, you have to include both the
+SONAR_TOKEN and the SONAR_PROJECT_KEY. The Token works for any user enabled to access the Project, in the account setting.
+The Project Key can be seen in the Information tab of the Project.
+
+Example:
+```
+APP_PROPERTIES_PATH=./modules/simple-app-backend/src/test/resources/application.properties
+REPORTS_PATH=./modules/simple-app-backend/target/surefire-reports
+PACKAGE_NAME=com.simple.app
+SONAR_KEY=1234567890xxxxxxx
+SONAR_PROJECT_KEY=archetype_archetype-web
+bash ./submodules/ensolvers-cicd/run-backend-tests.sh $APP_PROPERTIES_PATH $REPORTS_PATH $PACKAGE_NAME $SONAR_KEY $SONAR_PROJECT_KEY
 ```
 
 ## Other useful guides / how-tos
