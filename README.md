@@ -117,11 +117,19 @@ You can automate builds and deploys to s3 with a code build project:
 ## Automatic backend tests
 You can automate test execution using [run-backend-tests.sh](run-backend-tests.sh) (uses test containers).
 
+Make sure to have the database available, with a root user and default access.
+If you see any error with the environment, try to run again the schema.
+
 Just call this script from **your root project** directory passing it two parameters:
 
 - Path to application properties.
 - Path to test reports folder
 - Base package to scan
+
+Make sure that the project uses Surefire in the pom.xml, **at least** version 2 onward.
+
+Read [here](https://www.baeldung.com/maven-surefire-plugin) to make sure how to implement 
+Surefire in a pom for the root.
 
 Additionally, you can define the env variable `SLACK_WEBHOOK_URL` to send results to slack.
 
