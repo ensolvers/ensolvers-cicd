@@ -50,7 +50,7 @@ fi
 echo "Running tests"
 if [[ $# -eq 5 ]] ; then
   mvn clean org.jacoco:jacoco-maven-plugin:$jacoco_version:prepare-agent verify -Dmaven.test.failure.ignore=true org.jacoco:jacoco-maven-plugin:$jacoco_version:report
-elif
+else
   mvn test -Dtest="$PACKAGE_NAME".**.* -DfailIfNoTests=false
 fi
 ERROR_CODE=$?
