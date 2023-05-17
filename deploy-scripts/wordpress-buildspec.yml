@@ -2,15 +2,7 @@
 
 version: 0.2
 
-env:
-  git-credential-helper: yes
-
 phases:
-
-  pre_build:
-    commands:
-      - curl -X POST -d "{'text':'[$(echo "$ENV" | tr '[:lower:]' '[:upper:]')] [$(date +"%H:%M:%S") UTC-3] - Deploy started by \`$CODEBUILD_INITIATOR\`'}" "$SLACK_WEBHOOK_URL"
-
   build:
     commands:
       - bash ./wordpress-deploy-ecs.sh
