@@ -1,0 +1,225 @@
+AWSTemplateFormatVersion: 2010-09-09
+Parameters:
+  00EcsClusterName:
+    Type: String
+    Default: ENVIRONMENT-AppName
+    Description: Name of the cluster
+  01TaskRole:
+    Type: String
+    Default: arn:aws:iam::NNNNNNNNNNNNNN:role/ecsTaskExecutionRole
+    Description: >-
+      An IAM role to give the service's containers if the code within
+      needs to access other AWS resources like S3 buckets, DynamoDB tables, etc
+  02DesiredCount:
+    Type: Number
+    Default: 1
+    Description: How many copies of the service task to run
+  03ContainerServiceName:
+    Type: String
+    Default: webapp
+    Description: A name for the service
+  04DockerImage:
+    Type: String
+    Default: nginx
+    Description: The docker image ref, it could be a Docker ECR Repository URI or a standard Dockerhub image
+  05HealthCheckGracePeriodSeconds:
+    Type: String
+    Default: 300
+  06ContainerPort:
+    Type: Number
+    Default: 8080
+    Description: What port number the application inside the docker container is binding to
+  07ContainerCpu:
+    Type: Number
+    Default: 1024
+    Description: How much CPU to give the container. 1024 is 1 CPU
+  08ContainerMemory:
+    Type: Number
+    Default: 8192
+    Description: How much memory in megabytes to give the container - check https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-ecs-taskdefinition.html for valid CPU/Memory combinations
+  09SourceCidr:
+    Type: String
+    Description: >-
+      Optional - CIDR/IP range for EcsPort and ContainerPort - defaults to
+      0.0.0.0/0
+    Default: 0.0.0.0/0
+  10VPC:
+    Type: String
+    Description: Id of the VPC
+    Default: vpc-3a54a840
+  11Subnet1Id:
+    Type: String
+    Description: Id of the Subnet
+    Default: subnet-1db31a7a
+  12Subnet2Id:
+    Type: String
+    Description: Id of the Subnet
+    Default: subnet-546e926a
+  13LoadBalancerType:
+    Type: String
+    Default: 'internet-facing'
+    AllowedValues: ['internet-facing', 'internal']
+    Description: If the ELB will be available publicly (internet-facing) or if it is a private one (internal)
+  14FileSystem:
+    Type: String
+    Default: 'wordpress-efs'
+    Description: The EFS attached to ECS to host the files for the wordpress.
+
+Resources:
+  ECSCluster:
+    Type: 'AWS::ECS::Cluster'
+    Properties:
+      ClusterName: !Ref 00EcsClusterName
+
+  TaskDefinition:
+    Type: 'AWS::ECS::TaskDefinition'
+    Properties:
+      Family: !Ref 00EcsClusterName
+      Cpu: !Ref 07ContainerCpu
+      Memory: !Ref 08ContainerMemory
+      NetworkMode: awsvpc
+      RequiresCompatibilities:
+        - FARGATE
+      ExecutionRoleArn: !Ref 01TaskRole
+      TaskRoleArn: !Ref 01TaskRole
+      ContainerDefinitions:
+        - Name: !Ref 03ContainerServiceName
+          Cpu: !Ref 07ContainerCpu
+          Memory: !Ref 08ContainerMemory
+          Image: !Ref 04DockerImage
+          PortMappings:
+            - ContainerPort: !Ref 06ContainerPort
+          LogConfiguration:
+            LogDriver: "awslogs"
+            Options:
+              "awslogs-group": !Ref 00EcsClusterName
+              "awslogs-region": us-east-1
+              "awslogs-stream-prefix": !Ref 00EcsClusterName
+
+  EcsElasticLoadBalancer:
+    Type: 'AWS::ElasticLoadBalancingV2::LoadBalancer'
+    Properties:
+      Name: !Join
+        - '-'
+        - - !Ref 'AWS::StackName'
+          - ELB
+      SecurityGroups:
+        - !Ref EcsSecurityGroup
+      Subnets:
+        - !Ref 11Subnet1Id
+        - !Ref 12Subnet2Id
+      Scheme: !Ref 13LoadBalancerType
+
+  PublicLoadBalancerListener:
+    Type: 'AWS::ElasticLoadBalancingV2::Listener'
+    Properties:
+      LoadBalancerArn: !Ref EcsElasticLoadBalancer
+      Port: !Ref 06ContainerPort
+      Protocol: HTTP
+      DefaultActions:
+        - Type: forward
+          TargetGroupArn: !Ref TargetGroupPublic
+    DependsOn:
+      - TargetGroupPublic
+      - EcsElasticLoadBalancer
+
+  EcsService:
+    Type: 'AWS::ECS::Service'
+    Properties:
+      Cluster: !Ref ECSCluster
+      TaskDefinition: !Ref TaskDefinition
+      LaunchType: FARGATE
+      05HealthCheckGracePeriodSeconds: !Ref 05HealthCheckGracePeriodSeconds
+      DeploymentConfiguration:
+        MaximumPercent: 200
+        MinimumHealthyPercent: 75
+      02DesiredCount: !Ref 02DesiredCount
+      NetworkConfiguration:
+        AwsvpcConfiguration:
+          AssignPublicIp: ENABLED
+          SecurityGroups:
+            - !Ref EcsSecurityGroup
+          Subnets:
+            - !Ref 11Subnet1Id
+      LoadBalancers:
+        - ContainerName: !Ref 03ContainerServiceName
+          ContainerPort: '80'
+          TargetGroupArn: !Ref TargetGroupPublic
+      ServiceName: !Ref 00EcsClusterName
+    DependsOn:
+      - ECSCluster
+      - TaskDefinition
+      - PublicLoadBalancerListener
+
+  TargetGroupPublic:
+    Type: 'AWS::ElasticLoadBalancingV2::TargetGroup'
+    Properties:
+      VpcId: !Ref 10VPC
+      Port: !Ref 06ContainerPort
+      Protocol: HTTP
+      TargetType: ip
+      HealthCheckIntervalSeconds: 6
+      HealthCheckPath: /status
+      HealthCheckProtocol: HTTP
+      HealthCheckTimeoutSeconds: 5
+      HealthyThresholdCount: 2
+      UnhealthyThresholdCount: 2
+    DependsOn: EcsElasticLoadBalancer
+
+  EcsSecurityGroupHTTPinbound:
+    Type: 'AWS::EC2::SecurityGroupIngress'
+    Properties:
+      GroupId: !Ref EcsSecurityGroup
+      IpProtocol: tcp
+      FromPort: '80'
+      ToPort: '80'
+      CidrIp: !Ref 09SourceCidr
+
+  EcsSecurityGroupOutbound:
+    Type: 'AWS::EC2::SecurityGroupEgress'
+    Properties:
+      IpProtocol: tcp
+      FromPort: '0'
+      ToPort: '65535'
+      CidrIp: !Ref 09SourceCidr
+      GroupId: !Ref EcsSecurityGroup
+
+  EcsSecurityGroup:
+    Type: 'AWS::EC2::SecurityGroup'
+    Properties:
+      GroupDescription: ECS Allowed Ports
+      VpcId: !Ref 10VPC
+
+  LogGroup:
+    Type: 'AWS::Logs::LogGroup'
+    Properties:
+      LogGroupName: !Ref 00EcsClusterName
+      RetentionInDays: 7
+
+  ElasticFileSystem:
+    Type: AWS::EFS::FileSystem
+    Properties:
+      Encrypted: True
+
+Outputs:
+  Version:
+    Description: ECS Cloudformation template version
+    Value: 3.0.0
+  StackName:
+    Value: !Ref 'AWS::StackName'
+  PublicListener:
+    Description: The ARN of the public load balancer's Listener
+    Value: !Ref PublicLoadBalancerListener
+    Export:
+      Name: !Join
+        - '-'
+        - - !Ref 'AWS::StackName'
+          - PublicListener
+  EcsSecurityGroup:
+    Description: A security group used to allow Fargate containers to receive traffic
+    Value: !Ref EcsSecurityGroup
+    Export:
+      Name: !Join
+        - '-'
+        - - !Ref 'AWS::StackName'
+          - EcsSecurityGroup
