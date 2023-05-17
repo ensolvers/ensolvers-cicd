@@ -63,8 +63,8 @@
   "requiresCompatibilities": [
     "FARGATE"
   ],
-  "cpu": $VCPU,
-  "memory": $MEMORY,
+  "cpu": "$VCPU",
+  "memory": "$MEMORY",
   "volumes": [
     {
       "name": "wordpress",
