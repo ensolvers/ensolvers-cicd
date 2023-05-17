@@ -5,4 +5,5 @@ version: 0.2
 phases:
   build:
     commands:
+      - ROOT_DIR=$PWD
       - bash ./wordpress-deploy-ecs.sh
