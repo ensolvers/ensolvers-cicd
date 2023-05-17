@@ -1,56 +1,71 @@
-[{
-  "portMappings": [{
-    "hostPort": $SERVER_PORT,
-    "protocol": "tcp",
-    "containerPort": $SERVER_PORT
-  }],
-  "logConfiguration": {
-    "logDriver": "awslogs",
-    "options": {
-      "awslogs-group": "$CLUSTER_NAME",
-      "awslogs-region": "us-east-1",
-      "awslogs-stream-prefix": "$CLUSTER_NAME"
-    }
-  },
-  "environment": [
+{
+  "networkMode": "awsvpc",
+  "containerDefinitions": [
     {
-      "name": "MYSQLDB_HOST",
-      "value": "$RDS_ENDPOINT"
-    },
-    {
-      "name": "DB_NAME",
-      "value": "$DB_NAME"
-    },
-    {
-      "name": "PHP_MEMORY_LIMIT",
-      "value": "512M"
-    },
-    {
-      "name": "enabled",
-      "value": "false"
-    },
-    {
-      "name": "ALLOW_EMPTY_PASSWORD",
-      "value": "yes"
+      "portMappings": [
+        {
+          "hostPort": $SERVER_PORT,
+          "protocol": "tcp",
+          "containerPort": $SERVER_PORT
+        }
+      ],
+      "logConfiguration": {
+        "logDriver": "awslogs",
+        "options": {
+          "awslogs-group": "$CLUSTER_NAME",
+          "awslogs-region": "us-east-1",
+          "awslogs-stream-prefix": "$CLUSTER_NAME"
+        }
+      },
+      "environment": [
+        {
+          "name": "MYSQLDB_HOST",
+          "value": "$RDS_ENDPOINT"
+        },
+        {
+          "name": "DB_NAME",
+          "value": "$DB_NAME"
+        },
+        {
+          "name": "PHP_MEMORY_LIMIT",
+          "value": "512M"
+        },
+        {
+          "name": "enabled",
+          "value": "false"
+        },
+        {
+          "name": "ALLOW_EMPTY_PASSWORD",
+          "value": "yes"
+        }
+      ],
+      "secrets": [
+        {
+          "name": "DB_USERNAME",
+          "valueFrom": "$DB_USERNAME_DIR"
+        },
+        {
+          "name": "DB_PASSWORD",
+          "valueFrom": "$DB_PASSWORD_DIR"
+        }
+      ],
+      "mountPoints": [
+        {
+          "containerPath": "$WORDPRESS_IMAGE",
+          "sourceVolume": "wordpress"
+        }
+      ],
+      "image": "$WORDPRESS_IMAGE",
+      "essential": true,
+      "name": "wordpress"
     }
   ],
-  "secrets": [
-    {
-      "name": "DB_USERNAME",
-      "valueFrom": "$DB_USERNAME_DIR"
-    },
-    {
-      "name": "DB_PASSWORD",
-      "valueFrom": "$DB_PASSWORD_DIR"
-    }
+  "requiresCompatibilities": [
+    "FARGATE"
   ],
-  "mountPoints": [
-    {
-      "containerPath": "$WORDPRESS_IMAGE",
-      "sourceVolume": "wordpress"
-    }
-  ],
-  "volumesFrom": [
+  "cpu": $VCPU,
+  "memory": $MEMORY,
+  "volumes": [
     {
       "name": "wordpress",
       "efsVolumeConfiguration": {
@@ -63,9 +78,5 @@
       }
     }
   ],
-  "cpu": $VCPU,
-  "memoryReservation": $MEMORY,
-  "image": "$WORDPRESS_IMAGE",
-  "essential": true,
-  "name": "wordpress"
-}]
+  "family": "$CLUSTER_NAME"
+}
