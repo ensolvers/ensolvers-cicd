@@ -50,10 +50,7 @@
       "sourceVolume": "wordpress"
     }
   ],
-  "requiresCompatibilites": [
-    "FARGATE"
-  ],
-  "volumes": [
+  "volumesFrom": [
     {
       "name": "wordpress",
       "efsVolumeConfiguration": {
@@ -68,7 +65,6 @@
   ],
   "cpu": $VCPU,
   "memoryReservation": $MEMORY,
-  "volumesFrom": [],
   "image": "$WORDPRESS_IMAGE",
   "essential": true,
   "name": "wordpress"
