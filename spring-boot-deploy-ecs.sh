@@ -50,7 +50,7 @@ for (( i=0; i<SIZE; i++ ))
 
 
   # --------------- Build and Upload to s3 ---------------
-  cd $ROOT_DIR/modules/$MODULE_NAME
+  cd $ROOT_DIR/modules/$APP_NAME
 
   echo "Building and uploading jar file:
     S3_BUCKET_NAME=$S3_BUCKET_NAME
