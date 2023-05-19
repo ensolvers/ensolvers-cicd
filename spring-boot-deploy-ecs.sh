@@ -77,7 +77,7 @@ for (( i=0; i<SIZE; i++ ))
   cat "$dest_taskdef_file"
 
   echo "Registering new task definition"
-  revision=$(aws ecs register-task-definition --family "$CLUSTER_NAME" --network-mode awsvpc --cpu "$VCPU" --memory "$MEMORY" --requires-compatibilities FARGATE --container-definitions file://"$dest_taskdef_file" --region "$AWS_REGION" | jq -r '.taskDefinition.revision')
+  revision=$(aws ecs register-task-definition --family "$CLUSTER_NAME" --network-mode awsvpc --cpu "$VCPU" --memory "$MEMORY" --execution-role-arn $ECS_TASK_EXECUTION_ROLE --task-role-arn $ECS_TASK_EXECUTION_ROLE --requires-compatibilities FARGATE --container-definitions file://"$dest_taskdef_file" --region "$AWS_REGION" | jq -r '.taskDefinition.revision')
 
   echo "Updating ecs service"
   aws ecs update-service --cluster "$CLUSTER_NAME" --service "$CLUSTER_NAME" --task-definition "$CLUSTER_NAME":"$revision" --region "$AWS_REGION"
