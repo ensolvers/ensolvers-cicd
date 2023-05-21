@@ -1,0 +1,85 @@
+AWSTemplateFormatVersion: "2010-09-09"
+
+Parameters:
+  Prefix:
+    Type: String
+    Description: Prefix of the lambda functions
+    AllowedPattern: "[A-Za-z\\-_]+"
+    ConstraintDescription: Prefix of the lambda function must be provided
+
+Resources:
+  FunctionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub "${AWS::StackName}-FunctionRole"
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: 
+                - lambda.amazonaws.com
+                - edgelambda.amazonaws.com
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: CloudWatchLogsPolicy
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - logs:CreateLogGroup
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
+                Resource: arn:aws:logs:*:*:*
+
+  ViewerRequestFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: !Join [ "-", [ !Ref Prefix, "viewer-request" ] ]
+      Runtime: nodejs14.x
+      Role: !GetAtt FunctionRole.Arn
+      Handler: index.handler
+      Code:
+        ZipFile: |
+          // Your Node.js code here
+  ViewerResponseFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: !Join [ "-", [ !Ref Prefix, "viewer-response" ] ]
+      Runtime: nodejs14.x
+      Role: !GetAtt FunctionRole.Arn
+      Handler: index.handler
+      Code:
+        ZipFile: |
+          // Your Node.js code here
+  OriginRequestFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: !Join [ "-", [ !Ref Prefix, "origin-request" ] ]
+      Runtime: nodejs14.x
+      Role: !GetAtt FunctionRole.Arn
+      Handler: index.handler
+      Code:
+        ZipFile: |
+          // Your Node.js code here
+  OriginResponseFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: !Join [ "-", [ !Ref Prefix, "origin-response" ] ]
+      Runtime: nodejs14.x
+      Role: !GetAtt FunctionRole.Arn
+      Handler: index.handler
+      Code:
+        ZipFile: |
+          // Your Node.js code here
+
+Outputs:
+  ViewerRequestFunctionArn:
+    Value: !GetAtt ViewerRequestFunction.Arn
+  ViewerResponseFunctionArn:
+    Value: !GetAtt ViewerResponseFunction.Arn
+  OriginRequestFunctionArn:
+    Value: !GetAtt OriginRequestFunction.Arn
+  OriginResponseFunctionArn:
+    Value: !GetAtt OriginResponseFunction.Arn
