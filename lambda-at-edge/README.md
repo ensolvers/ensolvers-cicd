@@ -12,6 +12,12 @@ You can create new functions by using `setup/function-template.yaml` CloudFormat
 
 Those functions are empty initially, but their names match the structure that will be described below for deploying them - we just need to use the same prefix
 
+## Testing
+For running tests in each folder, the script `test-suite.sh` can be used. It basically runs Jest on every subfolder.
+
+For instance `./test-suite.sh path-to-lambdas`
+
+
 ## Deployment
 Deploying the function can be accomplished by running `setup/deploy-suite.sh` providing the correct folder when the functions are located, the region and the prefix for the remote function names.
 
