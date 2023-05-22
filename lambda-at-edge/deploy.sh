@@ -20,9 +20,11 @@ aws_region=$2
 function_name=$3
 zip_output_file="function.zip"
 
-# Move to function folder and run a cleanup
+# Move to function folder and run a cleanup: we remove old zip files and node_modules folders
 cd $function_folder
-rm -rf $zip_output_file node_modules;
+echo "Cleaning folder..."
+rm -rf $zip_output_file
+find . -name "node_modules" -type d -prune -exec rm -rf {} +
 
 # Install dependencies using yarn in production mode
 echo "Installing dependencies..."
