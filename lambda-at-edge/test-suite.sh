@@ -23,7 +23,7 @@ for folder in "$directory_path"/*; do
     echo "Running Jest in $folder"
     cd "$folder"
     yarn install
-    npx jest
+    npx jest --passWithNoTests
     cd -
   fi
 done
