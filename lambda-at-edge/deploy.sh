@@ -51,12 +51,12 @@ echo "Waiting function to be ready..."
 aws lambda wait function-active --function-name "$function_name"
 
 echo "Deploying new version..."
-aws lambda publish-version \
-  --function-name $function_name >> /dev/null
+function_arn=$(aws lambda publish-version \
+  --function-name $function_name --query 'FunctionArn' --output text)
 
 # Check if the function code was updated successfully
 if [ $? -eq 0 ]; then
-  echo "Lambda function code updated successfully."
+  echo "Lambda function code updated successfully (arn = $function_arn)."
 else
   echo "Failed to update Lambda function code."
 fi
