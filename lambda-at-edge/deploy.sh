@@ -9,8 +9,8 @@ if ! command -v aws &> /dev/null; then
 fi
 
 # Check if the required arguments are provided
-if [[ $# -lt 3 ]]; then
-    echo "Usage: bash deploy.sh <function_folder> <aws_region> <function_name>"
+if [[ $# -lt 4 ]]; then
+    echo "Usage: bash deploy.sh <function_folder> <aws_region> <function_name> <cloudfront-distribution-id>"
     exit 1
 fi
 
@@ -18,6 +18,7 @@ fi
 function_folder=$1
 aws_region=$2
 function_name=$3
+distribution_id=$4
 zip_output_file="function.zip"
 
 # Move to function folder and run a cleanup: we remove old zip files and node_modules folders
@@ -53,6 +54,17 @@ aws lambda wait function-active --function-name "$function_name"
 echo "Deploying new version..."
 function_arn=$(aws lambda publish-version \
   --function-name $function_name --query 'FunctionArn' --output text)
+
+echo "Deploying lambda@edge to Cloudfront distribution..."
+# Obtains config
+cf_config=$(aws cloudfront get-distribution-config --id $distribution_id)
+# Extracts ETag attribute
+etag=$(echo "$cf_config" | jq -r '.ETag')
+# Update function ARNs and store the DistributionConfig section into a file to trigger the update
+cf_config=$(echo $cf_config | jq ".DistributionConfig.DefaultCacheBehavior.LambdaFunctionAssociations.Items[].LambdaFunctionARN = \"$function_arn\"")
+echo "$cf_config" | jq '.DistributionConfig' > /tmp/cf.json
+# Triggers update using distribution ID and ETag
+aws cloudfront update-distribution --id $distribution_id --distribution-config file:///tmp/cf.json --if-match $etag
 
 # Check if the function code was updated successfully
 if [ $? -eq 0 ]; then
