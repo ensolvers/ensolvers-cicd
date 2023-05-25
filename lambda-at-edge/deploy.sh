@@ -64,7 +64,7 @@ etag=$(echo "$cf_config" | jq -r '.ETag')
 cf_config=$(echo $cf_config | jq ".DistributionConfig.DefaultCacheBehavior.LambdaFunctionAssociations.Items[].LambdaFunctionARN = \"$function_arn\"")
 echo "$cf_config" | jq '.DistributionConfig' > /tmp/cf.json
 # Triggers update using distribution ID and ETag
-aws cloudfront update-distribution --id $distribution_id --distribution-config file:///tmp/cf.json --if-match $etag
+aws cloudfront update-distribution --id $distribution_id --distribution-config file:///tmp/cf.json --if-match $etag >> /dev/null
 
 # Check if the function code was updated successfully
 if [ $? -eq 0 ]; then
