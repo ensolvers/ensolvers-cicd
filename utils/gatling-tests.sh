@@ -10,4 +10,4 @@ echo "Args: $GATLING_ARGS"
 
 cd $TEST_DIR
 
-mvn gatling:test -Dgatling.simulationClass=$SIMULATION_CLASS  "$GATLING_ARGS"
+mvn gatling:test -Dgatling.simulationClass=$SIMULATION_CLASS $GATLING_ARGS
