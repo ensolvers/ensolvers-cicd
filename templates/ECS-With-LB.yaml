@@ -1,0 +1,270 @@
+AWSTemplateFormatVersion: 2010-09-09
+Parameters:
+
+  00EcsClusterName:
+    Type: String
+    Default: ENVIRONMENT-AppName
+    Description: Name of the cluster
+
+  01HealthCheckGracePeriodSeconds:
+    Description: Time of tolerance before restarting the Task
+    Type: String
+    Default: 300
+
+  02PublicIP:
+    Description: If the service must provide or not a public IP for each task. *This can't be changed without destroying the service and creating a new one*
+    Type: String
+    Default: ENABLED
+    AllowedValues:
+    - ENABLED
+    - DISABLED
+
+  03VPC:
+    Type: AWS::EC2::VPC::Id
+    Description: Id of the VPC
+
+  04Subnet1Id:
+    Type: AWS::EC2::Subnet::Id
+    Description: Id of the Subnet for ECS Service
+
+  05Subnet2Id:
+    Type: AWS::EC2::Subnet::Id
+    Description: Id of the Subnet for ECS Service
+
+  06Protocol:
+    Description: Select the HTTP protocol to use. Leaving this on the default (HTTPS) is recommended.
+    Type: String
+    Default: HTTPS
+    AllowedValues:
+    - HTTPS
+    - HTTP  
+
+  07LBCertificateARN:
+    Type: String
+    Description: Certificate Manager ARN for the SSL. This is needed only when using HTTPS protocol.
+
+  08ExecutionRoleARN:
+    Type: String
+    Description: Role's ARN used for Tasks, must not be mocked.
+
+  09ContainerPort:
+    Type: Number
+    Description: READ IMPORTANT ':' The port on the container to associate with the load balancer. If you get this port wrong, you have to delete this stack and launch it again, so pay attention. This must be the same port that the Java application uses to run, either 80, 8080 or any other option.
+    Default: 80
+
+  10DBSecurityGroupId:
+    Type: String
+    Description: Database Security Group Id in case a connection is needed, if not just leave this empty.
+    Default: ''
+
+  11ECSInPrivateSubnet:
+    Type: String
+    Description: Set this to true if ECS Service will be in a private subnet (IMPORTANT - If not set correctly ECS will not be accessible)
+    AllowedValues: [ true, false ]
+    Default: false
+
+  12LBPublicSubnet1Id:
+    Type: String
+    Description: Id of the Public Subnet for Load Balancer. Must be defined only if ECSInPrivateSubnet is set to true (IMPORTANT - Must be on the same AZ as ECS Service)
+
+  13LBPublicSubnet2Id:
+    Type: String
+    Description: Id of the Public Subnet for Load Balancer. Must be defined only if ECSInPrivateSubnet is set to true (IMPORTANT - Must be on the same AZ as ECS Service)
+
+  14UsesRedis:
+    Type: String
+    Description: Set this to true if ECS Service needs to connect to an existing Redis Cluster.
+    AllowedValues: [ true, false ]
+    Default: false
+
+  15RedisSecurityGroupId:
+    Type: String
+    Description: Redis Security Group Id in case true was selected before, if not just leave this empty.
+    Default: ''
+
+Conditions:
+  UseHTTPS: !Equals [!Ref 06Protocol, HTTPS]
+  HasDBConnection: !Not [!Equals [!Ref 10DBSecurityGroupId, '']]
+  IsECSInPrivateSubnet: !Equals [true, !Ref 11ECSInPrivateSubnet]
+  HasRedisConnection: !Equals [true, !Ref 14UsesRedis]
+
+Resources:
+  ECSCluster:
+    Type: 'AWS::ECS::Cluster'
+    Properties:
+      ClusterName: !Ref 00EcsClusterName
+
+  EcsService:
+    Type: 'AWS::ECS::Service'
+    Properties:
+      Cluster: !Ref ECSCluster
+      TaskDefinition: !Ref TaskDefinition
+      LaunchType: FARGATE
+      HealthCheckGracePeriodSeconds: !Ref 01HealthCheckGracePeriodSeconds
+      DeploymentConfiguration:
+        MaximumPercent: 200
+        MinimumHealthyPercent: 75
+      DesiredCount: 0
+      NetworkConfiguration:
+        AwsvpcConfiguration:
+          AssignPublicIp: !Ref 02PublicIP
+          SecurityGroups:
+          - !Ref EcsSecurityGroup
+          Subnets:
+          - !Ref 04Subnet1Id
+          - !Ref 05Subnet2Id
+      LoadBalancers:
+      - ContainerName: webapp
+        ContainerPort: !Ref 09ContainerPort
+        TargetGroupArn: !Ref TargetGroupPublic
+      ServiceName: !Ref 00EcsClusterName
+    DependsOn:
+    - ECSCluster
+    - TaskDefinition
+    - DefaultLoadBalancerListener
+
+  TaskDefinition:
+    Type: 'AWS::ECS::TaskDefinition'
+    Properties:
+      Family: !Ref 00EcsClusterName
+      Cpu: 1024
+      Memory: 8192
+      NetworkMode: awsvpc
+      RequiresCompatibilities:
+      - FARGATE
+      ExecutionRoleArn: !Ref 08ExecutionRoleARN
+      TaskRoleArn: !Ref 08ExecutionRoleARN
+      ContainerDefinitions:
+      - Name: webapp
+        Cpu: 1024
+        Memory: 8192
+        Image: nginx
+        PortMappings:
+        - ContainerPort: !Ref 09ContainerPort
+        LogConfiguration:
+          LogDriver: "awslogs"
+          Options:
+              "awslogs-group": !Ref 00EcsClusterName
+              "awslogs-region": us-east-1
+              "awslogs-stream-prefix": !Ref 00EcsClusterName
+
+  EcsElasticLoadBalancer:
+    Type: 'AWS::ElasticLoadBalancingV2::LoadBalancer'
+    Properties:
+      Name: !Join
+      - '-'
+      - - !Ref 'AWS::StackName'
+        - ELB
+      SecurityGroups:
+      - !Ref EcsSecurityGroup
+      Subnets:
+      - !If [IsECSInPrivateSubnet, !Ref 12LBPublicSubnet1Id, !Ref 04Subnet1Id]
+      - !If [IsECSInPrivateSubnet, !Ref 13LBPublicSubnet2Id, !Ref 05Subnet2Id]
+      Scheme: internet-facing
+  
+  DefaultLoadBalancerListener:
+    Type: 'AWS::ElasticLoadBalancingV2::Listener'
+    Properties:
+      LoadBalancerArn: !Ref EcsElasticLoadBalancer
+      Port: 80
+      Protocol: HTTP
+      DefaultActions:
+      - Type: forward
+        TargetGroupArn: !Ref TargetGroupPublic
+    DependsOn:
+    - TargetGroupPublic
+    - EcsElasticLoadBalancer             
+
+  HTTPSLoadBalancerListener:
+    Type: 'AWS::ElasticLoadBalancingV2::Listener'
+    Condition: UseHTTPS
+    Properties:
+      LoadBalancerArn: !Ref EcsElasticLoadBalancer
+      Port: 443
+      Protocol: HTTPS
+      DefaultActions:
+      - Type: forward
+        TargetGroupArn: !Ref TargetGroupPublic
+      Certificates: 
+        - CertificateArn: !Ref 07LBCertificateARN
+      SSLPolicy: ELBSecurityPolicy-TLS-1-2-Ext-2018-06
+    DependsOn:
+    - TargetGroupPublic
+    - EcsElasticLoadBalancer
+
+  TargetGroupPublic:
+    Type: 'AWS::ElasticLoadBalancingV2::TargetGroup'
+    Properties:
+      Name: !Sub ${00EcsClusterName}-TG
+      VpcId: !Ref 03VPC
+      Port: !Ref 09ContainerPort
+      Protocol: HTTP
+      TargetType: ip
+      HealthCheckIntervalSeconds: 6
+      HealthCheckPath: /status
+      HealthCheckProtocol: HTTP
+      HealthCheckTimeoutSeconds: 5
+      HealthyThresholdCount: 2
+      UnhealthyThresholdCount: 2
+    DependsOn: EcsElasticLoadBalancer
+
+  EcsSecurityGroup:
+    Type: 'AWS::EC2::SecurityGroup'
+    Properties:
+      GroupName: !Sub ${00EcsClusterName}
+      GroupDescription: !Sub Security Group for ${00EcsClusterName}
+      VpcId: !Ref 03VPC
+  EcsSecurityGroupHTTPinbound:
+    Type: 'AWS::EC2::SecurityGroupIngress'
+    Properties:
+      GroupId: !Ref EcsSecurityGroup
+      IpProtocol: tcp
+      FromPort: !Ref 09ContainerPort
+      ToPort: !Ref 09ContainerPort
+      CidrIp: 0.0.0.0/0
+  EcsSecurityGroupHTTPSinbound:
+    Type: 'AWS::EC2::SecurityGroupIngress'
+    Condition: UseHTTPS
+    Properties:
+      GroupId: !Ref EcsSecurityGroup
+      IpProtocol: tcp
+      FromPort: '443'
+      ToPort: '443'
+      CidrIp: 0.0.0.0/0
+  EcsSecurityGroupOutbound:
+    Type: 'AWS::EC2::SecurityGroupEgress'
+    Properties:
+      IpProtocol: tcp
+      FromPort: '0'
+      ToPort: '65535'
+      CidrIp: 0.0.0.0/0
+      GroupId: !Ref EcsSecurityGroup
+
+  DBSecurityGroupInbound:
+    Type: 'AWS::EC2::SecurityGroupIngress'
+    Condition: HasDBConnection
+    Properties:
+      GroupId: !Ref 10DBSecurityGroupId
+      IpProtocol: tcp
+      FromPort: 3306
+      ToPort: 3306
+      SourceSecurityGroupId: !Ref EcsSecurityGroup
+      Description: !Sub ${00EcsClusterName} - Connection
+
+  RedisSecurityGroupInbound:
+    Type: 'AWS::EC2::SecurityGroupIngress'
+    Condition: HasRedisConnection
+    Properties:
+      GroupId: !Ref 15RedisSecurityGroupId
+      IpProtocol: tcp
+      FromPort: 6379
+      ToPort: 6379
+      SourceSecurityGroupId: !Ref ECSSecurityGroup
+      Description: !Sub ${00EcsClusterName} - Connection
+
+  LogGroup:
+    Type: 'AWS::Logs::LogGroup'
+    Properties:
+      LogGroupName: !Ref 00EcsClusterName
+      RetentionInDays: 7
+

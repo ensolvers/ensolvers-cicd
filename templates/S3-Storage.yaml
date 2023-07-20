@@ -1,0 +1,80 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Parameters:
+  00BucketName:
+    Type: String
+    Default: 'example'
+    AllowedPattern: (?=^.{3,63}$)(?!^(\d+\.)+\d+$)(^(([a-z0-9]|[a-z0-9][a-z0-9\-]*[a-z0-9])\.)*([a-z0-9]|[a-z0-9][a-z0-9\-]*[a-z0-9])$)
+    ConstraintDescription: 'Only lowercase letters, hyphens and numbers. Length between 3 and 63 characters'
+  01LogsBucketName:
+    Type: String
+    Default: 'log-example'
+    AllowedPattern: (?=^.{3,63}$)(?!^(\d+\.)+\d+$)(^(([a-z0-9]|[a-z0-9][a-z0-9\-]*[a-z0-9])\.)*([a-z0-9]|[a-z0-9][a-z0-9\-]*[a-z0-9])$)
+    ConstraintDescription: 'Only lowercase letters, hyphens and numbers. Length between 3 and 63 characters'
+  02AccessControl:
+    Default: Private
+    Type: String
+    AllowedValues:
+    - Private
+    - PublicRead
+    - PublicReadWrite
+    - AuthenticatedRead
+    - LogDeliveryWrite
+    - BucketOwnerRead
+    - BucketOwnerFullControl
+  03KeyId:
+    Type: String
+    Default: ''
+Resources:
+  MyBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      AccessControl: !Ref 02AccessControl
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: aws:kms
+              KMSMasterKeyID: !Ref 03KeyId
+      BucketName: !Ref 00BucketName
+      LifecycleConfiguration:
+        Rules:
+        - AbortIncompleteMultipartUpload:
+            DaysAfterInitiation: 3
+          NoncurrentVersionExpirationInDays: 3
+          Status: Enabled
+      LoggingConfiguration:
+        DestinationBucketName: !Ref MyBucketLogs
+        LogFilePrefix: !Sub '/logs/${00BucketName}/'
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      VersioningConfiguration:
+        Status: Enabled
+
+  MyBucketLogs:
+    Type: AWS::S3::Bucket
+    Properties:
+      AccessControl: LogDeliveryWrite
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: aws:kms
+              KMSMasterKeyID: !Ref 03KeyId
+      BucketName: !Ref 01LogsBucketName
+      LifecycleConfiguration:
+        Rules:
+        - AbortIncompleteMultipartUpload:
+            DaysAfterInitiation: 3
+          NoncurrentVersionExpirationInDays: 3
+          Status: Enabled
+          Transitions:
+            - StorageClass: DEEP_ARCHIVE
+              TransitionInDays: 3
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+
+

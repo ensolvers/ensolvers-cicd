@@ -1,0 +1,48 @@
+Transform: AWS::SecretsManager-2020-07-23
+Parameters:
+
+  00RedisClusterName:
+    Description: Name for the Redis Cache
+    Type: String
+  
+  01VPCId:
+    Description: "VPC for the DB"
+    Type: AWS::EC2::VPC::Id
+
+  02SubnetRedis:
+    Description: "Subnet for the DB"
+    Type: AWS::EC2::Subnet::Id
+
+Resources:
+
+  RedisInstanceSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: SecurityGroup for Redis
+      VpcId: !Ref VPCId
+      SecurityGroupIngress:
+      - IpProtocol: tcp
+        FromPort: 0
+        ToPort: 6379
+
+  RedisSubnetGroup:
+    Type: AWS::ElastiCache::SubnetGroup
+    Properties:
+      CacheSubnetGroupName: !Sub ${AWS::StackName}-SG
+      Description: !Sub Subnet Group for Redis
+      SubnetIds:
+        - !Ref SubnetRedis
+
+  RedisCache:
+    Type: AWS::ElastiCache::CacheCluster
+    Properties:
+      CacheNodeType: cache.t3.micro
+      CacheSubnetGroupName: !Ref RedisSubnetGroup
+      ClusterName: !Sub ${00RedisClusterName}
+      Engine: redis
+      EngineVersion: 5.0.6
+      NumCacheNodes: 1
+      Port: 6379
+      VpcSecurityGroupIds: 
+        - !Ref RedisInstanceSecurityGroup
+
