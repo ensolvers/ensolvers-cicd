@@ -1,0 +1,46 @@
+AWSTemplateFormatVersion: 2010-09-09
+Parameters:
+  00DeploymentEnv:
+    AllowedValues:
+      - "QA"
+      - "PROD"
+    Default: QA
+    Description: Environment where the Kinesis Stream will be created
+    Type: String
+  01StreamName:
+    Type: String
+    Description: Name of the Stream
+    AllowedPattern: '[a-zA-Z0-9_.-]+'
+  02ShardsCount:
+    Type: Number
+    Description: The amount of Shards to create for the Stream. For QA limit the value to 3 max
+    MinValue: 1
+    MaxValue: 120
+  03KeyID:
+    Type: String
+    Description: ID for the key used on encryption
+
+Conditions:
+  PRODDeployment: !Equals 
+    - !Ref 00DeploymentEnv
+    - "PROD"
+  QADeployment: !Equals
+    - !Ref 00DeploymentEnv
+    - "QA"
+
+Resources:
+  Stream:
+    Type: 'AWS::Kinesis::Stream'
+    Properties:
+      Name: !Sub ${00DeploymentEnv}-${01StreamName}-Stream
+      ShardCount: !Ref 02ShardsCount
+      StreamEncryption:
+        EncryptionType: KMS
+        KeyId: !Ref 03KeyID
+
+  StreamConsumer:
+    Type: 'AWS::Kinesis::StreamConsumer'
+    Properties:
+      ConsumerName: !Sub "${00DeploymentEnv}-${01StreamName}-Consumer"
+      StreamARN: !GetAtt Stream.Arn
+

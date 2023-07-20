@@ -1,0 +1,141 @@
+Transform: AWS::SecretsManager-2020-07-23
+Description: "MySQL 5.7, using db-m4-large. It adds a BastionBox for connection. The Pair-Key must be created manually and downloaded"
+Parameters:
+
+  00EnvType:
+    Description: "Environment for the build - QA or PROD"
+    Default: QA
+    Type: String
+    AllowedValues:
+    - PROD
+    - PREPROD
+    - QA
+
+  01DBInstanceName:
+    Description: "Name of the instance of RDS to be created"
+    Type: String
+
+  02DBName:
+    Description: "Name of the database inside the instance"
+    Type: String
+
+  03VPC:
+    Description: "VPC for the DB"
+    Type: AWS::EC2::VPC::Id
+
+  04Subnet1ForDB:
+    Description: "Primary Subnet for the DB - Recommended a Private Subnet for security measures"
+    Type: AWS::EC2::Subnet::Id
+
+  05Subnet2ForDB:
+    Description: "Primary Subnet for the DB - Recommended a Private Subnet for security measures"
+    Type: AWS::EC2::Subnet::Id
+
+  06SubnetForBB:
+    Description: "Subnet for the BastionBox - Use a public subnet"
+    Type: AWS::EC2::Subnet::Id
+
+  07AllocatedStorage:
+    Description: "Storage to apply for the DB. It must be between 20 and 65536"
+    Type: String
+
+  08EncryptionKey:
+    Description: "Key to be used for encryption on DB - CF doesn't support query, must be copied manually"
+    Type: String
+
+  09EC2KeyPair:
+    Description: "Key to connect with SSH to EC2 - KeyPair must be created beforehand"
+    Type: String
+
+  10EC2AMI:
+    Description: "Type of AMI to run on the EC2 BastionBox. By default, an Ubuntu 20.04 will be used"
+    Type: String
+    Default: ami-04505e74c0741db8d
+  
+  11EC2InstanceType:
+    Description: "Instance type of the EC2 BastionBox. By default, an t3.micro will be used"
+    Type: String
+    Default: t3.micro
+
+
+Resources:
+
+  InstanceBBSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: SecurityGroup for Bastion Box
+      GroupName: !Sub ${00EnvType}-BastionBox
+      VpcId: !Ref 03VPC
+
+  BastionBox:
+    Type: AWS::EC2::Instance
+    Properties:
+      ImageId: !Ref 10EC2AMI
+      InstanceType: !Ref 11EC2InstanceType
+      KeyName: !Ref 09EC2KeyPair
+      SubnetId: !Ref 06SubnetForBB
+      SecurityGroupIds:
+        - !Ref InstanceBBSecurityGroup
+      Tags:
+        - Key: "Name"
+          Value: !Sub ${00EnvType}-BastionBox
+      
+
+  InstanceDBSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: SecurityGroup for Database
+      GroupName: !Sub ${00EnvType}-DB
+      VpcId: !Ref 03VPC
+
+  InstanceDBSecurityGroupIngress:
+    Type: AWS::EC2::SecurityGroupIngress
+    Properties:
+      GroupId: !Ref InstanceDBSecurityGroup
+      IpProtocol: tcp
+      ToPort: 3306
+      FromPort: 3306
+      SourceSecurityGroupId: !Ref InstanceBBSecurityGroup
+      Description: BastionBox Connection
+
+  MyRDSInstanceRotationSecret:
+    Type: AWS::SecretsManager::Secret
+    Properties:
+      Description: 'Secret for DB'
+      KmsKeyId: !Ref 08EncryptionKey
+      Name: !Sub ${00EnvType}-RDS-Secrets         
+      GenerateSecretString:
+        SecretStringTemplate: '{"username": "administrator"}'
+        GenerateStringKey: 'password'
+        PasswordLength: 30
+        ExcludeCharacters: '"@/\'
+
+  MyDBInstance:
+    Type: AWS::RDS::DBInstance
+    Properties:
+      AllocatedStorage: !Ref 07AllocatedStorage
+      BackupRetentionPeriod: 7
+      DBInstanceClass: db.m4.large
+      DBInstanceIdentifier: !Ref 01DBInstanceName
+      DBName: !Ref 02DBName
+      DBSubnetGroupName: !Ref MyDBSubnetGroup
+      Engine: mysql
+      EngineVersion: '5.7'
+      KmsKeyId: !Ref 08EncryptionKey
+      MasterUsername: !Sub '{{resolve:secretsmanager:${MyRDSInstanceRotationSecret}::username}}'
+      MasterUserPassword: !Sub '{{resolve:secretsmanager:${MyRDSInstanceRotationSecret}::password}}'
+      Port: 3306
+      PubliclyAccessible: false
+      StorageEncrypted: true
+      VPCSecurityGroups:
+        - !Ref InstanceDBSecurityGroup
+
+      #Database subnet group for the RDS instance 
+  MyDBSubnetGroup: 
+    Type: AWS::RDS::DBSubnetGroup
+    Properties: 
+      DBSubnetGroupDescription: "Subnet Groups"
+      SubnetIds: 
+        - Ref: 04Subnet1ForDB
+        - Ref: 05Subnet2ForDB
+

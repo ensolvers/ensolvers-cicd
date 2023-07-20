@@ -1,0 +1,99 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Parameters:
+  00ProjectName:
+    Type: String
+    Default: ''
+  01EnvType:
+    Default: QA
+    Type: String
+    AllowedValues:
+    - PROD
+    - QA
+    - DEV
+  02AdminsForKey:
+    Description: A list of ARNs of IAM Users and/or IAM Roles allowed to administrate the Key (Comma delimited)
+    Type: CommaDelimitedList
+  03UsersForKey:
+    Description: A list of ARNs of IAM Users and/or IAM Roles enabled to operate with the Key (Comma delimited)
+    Type: CommaDelimitedList
+Resources:
+  MKey:
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
+    Type: AWS::KMS::Key
+    Properties:
+      Description: CMK that encrypts the entire project
+      EnableKeyRotation: true
+      PendingWindowInDays: 15
+      KeyPolicy:
+        Version: '2012-10-17'
+        Id: !Join
+          - "-"
+          - - !Ref 00ProjectName
+            - !Ref 01EnvType
+            - CMK
+        Statement:
+        - Sid: Enable IAM User Permissions
+          Effect: Allow
+          Principal:
+            AWS: !Sub 'arn:aws:iam::${AWS::AccountId}:root'
+          Action: kms:*
+          Resource: "*"
+        - Sid: Allow administration of the key
+          Effect: Allow
+          Principal:
+            AWS: !Ref 02AdminsForKey
+          Action:
+          - kms:Create*
+          - kms:Describe*
+          - kms:Enable*
+          - kms:List*
+          - kms:Put*
+          - kms:Update*
+          - kms:Revoke*
+          - kms:Disable*
+          - kms:Get*
+          - kms:Delete*
+          - kms:ScheduleKeyDeletion
+          - kms:CancelKeyDeletion
+          Resource: "*"
+        - Sid: Allow use of the key
+          Effect: Allow
+          Principal:
+            AWS: !Split
+              - ','
+              - !Sub
+                - "${usersToString},arn:aws:iam::${AWS::AccountId}:root"
+                - usersToString: !Join [',',!Ref 03UsersForKey]
+          Action:
+          - kms:Encrypt
+          - kms:Decrypt
+          - kms:ReEncrypt*
+          - kms:GenerateDataKey*
+          - kms:DescribeKey
+          Resource: "*"
+        - Sid: Allow attachment of persistent resources
+          Effect: Allow
+          Principal:
+            AWS: !Sub 'arn:aws:iam::${AWS::AccountId}:root'
+          Action:
+          - kms:CreateGrant
+          - kms:ListGrants
+          - kms:RevokeGrant
+          Resource: "*"
+          Condition:
+            Bool:
+              kms:GrantIsForAWSResource: true
+  KeyAlias:
+    Type: 'AWS::KMS::Alias'
+    Properties:
+      AliasName: !Join 
+        - ''
+        - - 'alias/'
+          - !Ref 01EnvType
+          - '-Key'
+      TargetKeyId: !Ref MKey
+Outputs:
+  KeyId:
+    Value: !Ref MKey
+

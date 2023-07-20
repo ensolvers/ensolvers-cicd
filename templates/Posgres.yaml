@@ -1,0 +1,77 @@
+Transform: AWS::SecretsManager-2020-07-23
+Parameters:
+  00VPCId:
+    Description: "VPC for the DB"
+    Type: AWS::EC2::VPC::Id
+
+  01Subnet01:
+    Description: "Subnet for the DB"
+    Type: AWS::EC2::Subnet::Id
+
+  02Subnet02:
+    Description: "Subnet for the DB"
+    Type: AWS::EC2::Subnet::Id
+
+  03DBInstanceName:
+    Type: String
+
+  04DBName:
+    Type: String
+
+  05KeyId:
+    Type: String
+
+Resources:
+
+  InstanceSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: SecurityGroup for Database
+      VpcId: !Ref 00VPCId
+      SecurityGroupIngress:
+      - IpProtocol: tcp
+        ToPort: 5432
+        FromPort: 5432
+
+      #This is a Secret resource with a randomly generated password in its SecretString JSON.
+  MyRDSInstanceRotationSecret:
+    Type: AWS::SecretsManager::Secret
+    Properties:
+      Description: 'Secret for DB'
+      KmsKeyId: !Ref 05KeyId
+      GenerateSecretString:
+        SecretStringTemplate: '{"username": "administrator"}'
+        GenerateStringKey: 'password'
+        PasswordLength: 30
+        ExcludeCharacters: '"@/\'
+
+  MyDBInstance:
+    Type: AWS::RDS::DBInstance
+    Properties:
+      AllocatedStorage: '50'
+      BackupRetentionPeriod: 7
+      DBInstanceClass: db.m4.large
+      DBInstanceIdentifier: !Ref 03DBInstanceName
+      DBName: !Ref 04DBName
+      DBSubnetGroupName: !Ref MyDBSubnetGroup
+      Engine: postgres
+      EngineVersion: '12.4'
+      KmsKeyId: !Ref 05KeyId
+      MasterUsername: !Sub '{{resolve:secretsmanager:${MyRDSInstanceRotationSecret}::username}}'
+      MasterUserPassword: !Sub '{{resolve:secretsmanager:${MyRDSInstanceRotationSecret}::password}}'
+      Port: 5432
+      PubliclyAccessible: false
+      StorageEncrypted: true
+      VPCSecurityGroups:
+        - !Ref InstanceSecurityGroup
+
+      #Database subnet group for the RDS instance 
+  MyDBSubnetGroup: 
+    Type: AWS::RDS::DBSubnetGroup
+    Properties: 
+      DBSubnetGroupDescription: "Subnet Groups"
+      SubnetIds: 
+        - Ref: 01Subnet01
+        - Ref: 02Subnet02
+    
+
