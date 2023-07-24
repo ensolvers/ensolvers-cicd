@@ -3,7 +3,7 @@
 TEST_DIR="$1"
 SIMULATION_CLASS="$2"
 GATLING_ARGS="$3"
-REPORT_FILE_S3_URL="s3://$4/$(echo "SIMULATION_CLASS" | awk -F "." '{print $NF}')/$(date +%s).html"
+REPORT_FILE_S3_URL="s3://$4/$(echo "$SIMULATION_CLASS" | awk -F "." '{print $NF}')/$(date +%s).html"
 
 echo "Dir: $TEST_DIR"
 echo "Class: $SIMULATION_CLASS"
