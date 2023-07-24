@@ -3,7 +3,7 @@
 TEST_DIR="$1"
 SIMULATION_CLASS="$2"
 GATLING_ARGS="$3"
-REPORT_FILE_S3_URL="$4"/reports/$SIMULATION_CLASS-$(date +%s).html
+REPORT_FILE_S3_URL="$4"/$(echo "SIMULATION_CLASS" | awk -F "." '{print $NF}')/$(date +%s).html
 
 echo "Dir: $TEST_DIR"
 echo "Class: $SIMULATION_CLASS"
@@ -13,4 +13,6 @@ cd $TEST_DIR
 
 mvn gatling:test -Dgatling.simulationClass=$SIMULATION_CLASS $GATLING_ARGS
 
-aws s3 cp target/gatling/*.html "$REPORT_FILE_S3_URL"
+cd target/gatling/*
+
+aws s3 cp index.html "$REPORT_FILE_S3_URL"
