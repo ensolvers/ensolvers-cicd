@@ -13,6 +13,4 @@ cd $TEST_DIR
 
 mvn gatling:test -Dgatling.simulationClass=$SIMULATION_CLASS $GATLING_ARGS
 
-cd target/gatling/*
-
-aws s3 cp index.html "$REPORT_FILE_S3_URL"
+aws s3 cp "$(find . -name index.html)" "$REPORT_FILE_S3_URL"
