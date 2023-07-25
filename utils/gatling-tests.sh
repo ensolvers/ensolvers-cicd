@@ -3,7 +3,7 @@
 TEST_DIR="$1"
 SIMULATION_CLASS="$2"
 GATLING_ARGS="$3"
-REPORT_FILE_S3_URL="s3://$4/$(echo "$SIMULATION_CLASS" | awk -F "." '{print $NF}')/$(date +%s)"
+REPORT_FILE_S3_URL="s3://$4/$(echo "$SIMULATION_CLASS" | awk -F "." '{print $NF}')/$(date +%s)/test.zip"
 
 echo "Dir: $TEST_DIR"
 echo "Class: $SIMULATION_CLASS"
@@ -18,4 +18,6 @@ cd target/gatling
 
 rm lastRun.txt
 
-aws s3 cp  --recursive ./ "$REPORT_FILE_S3_URL" --sse aws:kms --sse-kms-key-id $KEY_ID
+zip -r test.zip .
+
+aws s3 cp test.zip "$REPORT_FILE_S3_URL" --sse aws:kms --sse-kms-key-id $KEY_ID
