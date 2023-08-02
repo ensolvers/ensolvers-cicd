@@ -7,7 +7,7 @@ export ENTITY_ID=$4
 export DB_HOST=$5
 export DB_NAME=$6
 
-if [ -z $ENTITY_NAME ] || [ -z $ENTITY_ID ] || [ -z $DB_USER ] || [ -z $DB_HOST ] || [ -z $DB_NAME ]; then
+if [ -z $ENTITY_NAME ] || [ -z $DB_PASS] || [ -z $ENTITY_ID ] || [ -z $DB_USER ] || [ -z $DB_HOST ] || [ -z $DB_NAME ]; then
 	echo "[ERROR] Expected 6 params: correct usage --> sudo ./dump_database.sh <DB_USER> <DB_PASS> <ENTITY_NAME> <ENTITY_ID> <DB_HOST> <DB_NAME>"
 	exit -1
 fi
@@ -31,9 +31,9 @@ function create_backup() {
     WHERE_CONDITION=${WHERE_CONDITION//\$ENTITY_ID/$ENTITY_ID}
 
     if [[ -n "$WHERE_CONDITION" ]]; then
-    	mysqldump -p$DB_PASS --host="$DB_HOST" -u"$DB_USER" --skip-column-statistics --skip-lock-tables --no-tablespaces "$DB_NAME" "$TABLENAME" --where="${WHERE_CONDITION}" | gzip > "$BACKUP_DIR/${TABLENAME}-${ENTITY_NAME}-${ENTITY_ID}.sql.gz"
+    	mysqldump -p"$DB_PASS" --host="$DB_HOST" -u"$DB_USER" --skip-column-statistics --skip-lock-tables --no-tablespaces "$DB_NAME" "$TABLENAME" --where="${WHERE_CONDITION}" | gzip > "$BACKUP_DIR/${TABLENAME}-${ENTITY_NAME}-${ENTITY_ID}.sql.gz"
     else
-    	mysqldump -p$DB_PASS --host="$DB_HOST" -u"$DB_USER" --skip-column-statistics --skip-lock-tables --no-tablespaces "$DB_NAME" "$TABLENAME" | gzip > "$BACKUP_DIR/${TABLENAME}-${ENTITY_NAME}-${ENTITY_ID}.sql.gz"
+    	mysqldump -p"$DB_PASS" --host="$DB_HOST" -u"$DB_USER" --skip-column-statistics --skip-lock-tables --no-tablespaces "$DB_NAME" "$TABLENAME" | gzip > "$BACKUP_DIR/${TABLENAME}-${ENTITY_NAME}-${ENTITY_ID}.sql.gz"
     fi
 
 }

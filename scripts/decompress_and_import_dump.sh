@@ -9,10 +9,17 @@ HOST=$6
 DB_HOST=$7
 DB_NAME=$8
 DB_USER=$9
-DB_PASSWORD=${10}
+#DB_PASSWORD="${10}"
 
-if [ -z $ENTITY_NAME ] || [ -z $ENTITY_ID ] || [ -z $TABLE_CONDITIONS_PATH ] || [ -z $PATH_TO_SSH_KEY ] || [ -z $LOCAL_DB_NAME ] || [ -z $HOST ] || [ -z $DB_HOST ] || [ -z $DB_NAME ] || [ -z $DB_USER ] || [ -z $DB_PASSWORD ]; then
-    echo "[ERROR] Expected 10 params: correct usage --> ./decompress_and_import_dump.sh <ENTITY_NAME> <ENTITY_ID> <TABLE_CONDITIONS_PATH> <PATH_TO_SSH_KEY> <LOCAL_DB_NAME> <HOST> <DB_HOST> <DB_NAME> <DB_USER> <DB_PASSWORD>"
+if [ -z $ENTITY_NAME ] || [ -z $ENTITY_ID ] || [ -z $TABLE_CONDITIONS_PATH ] || [ -z $PATH_TO_SSH_KEY ] || [ -z $LOCAL_DB_NAME ] || [ -z $HOST ] || [ -z $DB_HOST ] || [ -z $DB_NAME ] || [ -z $DB_USER ]; then
+    echo "[ERROR] Expected 9 params: correct usage --> ./decompress_and_import_dump.sh <ENTITY_NAME> <ENTITY_ID> <TABLE_CONDITIONS_PATH> <PATH_TO_SSH_KEY> <LOCAL_DB_NAME> <HOST> <DB_HOST> <DB_NAME> <DB_USER>"
+    exit -1
+fi
+
+
+if [ -z $DB_PASSWORD ]; then
+    echo "You need to provide the password for accessing the database via the DB_PASSWORD env var"
+    echo "Example: export DB_PASSWORD='<password>'"
     exit -1
 fi
 
