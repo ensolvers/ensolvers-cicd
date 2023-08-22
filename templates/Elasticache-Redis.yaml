@@ -19,7 +19,7 @@ Resources:
     Type: AWS::EC2::SecurityGroup
     Properties:
       GroupDescription: SecurityGroup for Redis
-      VpcId: !Ref VPCId
+      VpcId: !Ref 01VPCId
       SecurityGroupIngress:
       - IpProtocol: tcp
         FromPort: 0
@@ -31,7 +31,7 @@ Resources:
       CacheSubnetGroupName: !Sub ${AWS::StackName}-SG
       Description: !Sub Subnet Group for Redis
       SubnetIds:
-        - !Ref SubnetRedis
+        - !Ref 02SubnetRedis
 
   RedisCache:
     Type: AWS::ElastiCache::CacheCluster

@@ -259,7 +259,7 @@ Resources:
       IpProtocol: tcp
       FromPort: 6379
       ToPort: 6379
-      SourceSecurityGroupId: !Ref ECSSecurityGroup
+      SourceSecurityGroupId: !Ref EcsSecurityGroup
       Description: !Sub ${00EcsClusterName} - Connection
 
   LogGroup:
