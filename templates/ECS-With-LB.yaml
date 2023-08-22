@@ -64,11 +64,11 @@ Parameters:
     Default: false
 
   12LBPublicSubnet1Id:
-    Type: String
+    Type: AWS::EC2::Subnet::Id
     Description: Id of the Public Subnet for Load Balancer. Must be defined only if ECSInPrivateSubnet is set to true (IMPORTANT - Must be on the same AZ as ECS Service)
 
   13LBPublicSubnet2Id:
-    Type: String
+    Type: AWS::EC2::Subnet::Id
     Description: Id of the Public Subnet for Load Balancer. Must be defined only if ECSInPrivateSubnet is set to true (IMPORTANT - Must be on the same AZ as ECS Service)
 
   14UsesRedis:
