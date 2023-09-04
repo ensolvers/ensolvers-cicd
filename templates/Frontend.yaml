@@ -56,10 +56,13 @@ Resources:
     Type: AWS::S3::Bucket
     Properties:
       BucketName: !Join ['.', [!Ref '01Subdomain', !Ref '00HostedZone']]
-      AccessControl: PublicRead
       WebsiteConfiguration:
         IndexDocument: index.html
         ErrorDocument: error.html
+      OwnershipControls:
+        Rules:
+          - ObjectOwnership: ObjectWriter
+      
   WebsiteCDN:
     Type: AWS::CloudFront::Distribution
     Properties:

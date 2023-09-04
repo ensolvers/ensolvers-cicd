@@ -51,6 +51,9 @@ Resources:
         RestrictPublicBuckets: true
       VersioningConfiguration:
         Status: Enabled
+      OwnershipControls:
+          Rules:
+            - ObjectOwnership: ObjectWriter
 
   MyBucketLogs:
     Type: AWS::S3::Bucket
@@ -76,5 +79,8 @@ Resources:
         BlockPublicPolicy: true
         IgnorePublicAcls: true
         RestrictPublicBuckets: true
+      OwnershipControls:
+          Rules:
+            - ObjectOwnership: ObjectWriter
 
 
