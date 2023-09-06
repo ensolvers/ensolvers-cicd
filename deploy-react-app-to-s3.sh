@@ -4,6 +4,7 @@ set -eu
 BASEDIR=$(dirname "$0")
 APP_PATH=("$1")
 AWS_ENV_CONFIGURATION=${2-""}
+BUILD_PATH=${3-"build"}
 TIME_DEPLOY=$(date +%s)
 
 #load utils
@@ -27,7 +28,7 @@ slack_notification "[${ENV^^}] [$(date +"%H:%M:%S") UTC][FRONTEND] - Building fo
 
 echo "[$(date)] Building app..."
 cd "$APP_PATH"
-rm -rf build
+rm -rf $BUILD_PATH
 cp src/environment.json src/environment-backup.json
 cp src/$ENVIRONMENT_FILE src/environment.json
 echo "{\"version\": \"$(date '+%Y-%m-%d %H:%M:%S')\"}" > public/version.json # TODO to be replaced by automatic tagging script
@@ -37,7 +38,7 @@ cp src/environment-backup.json src/environment.json
 rm -rf src/environment-backup.json public/version.json
 
 echo "[$(date)] Uploading file to S3"
-aws s3 sync build s3://$S3_BUCKET/ --acl public-read
+aws s3 sync $BUILD_PATH s3://$S3_BUCKET/ --acl public-read
 
 echo "[$(date)] Triggering CF distribution invalidation"
 aws cloudfront create-invalidation --distribution-id $CLOUDFRONT_DISTRIBUTION_ID --paths "/*"
