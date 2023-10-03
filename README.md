@@ -2,7 +2,22 @@
 
 This project includes a series of scripts and utils to simplify CI/CD processes, including app building, testing, etc.
 
+## General Cloudformation Templates
+
+One of the key components that this repo includes is a set of Cloudformation templates that simplifies provisioning
+infrastructure. Some of them are listed below:
+
+- [MySQL-Instance-5.7](templates/MySQL-Instance-5.7.yaml): provision a MySQL 5.7 RDS instance
+- [MySQL-Aurora-5.7](templates/MySQL-Aurora-5.7.yaml): provision a MySQL 5.7-based RDS Aurora cluster
+- [MySQL-Aurora-8.0](templates/MySQL-Aurora-8.0.yaml): provision a MySQL 8.0-based RDS Aurora cluster
+- [Frontend](templates/Frontend.yaml): Assuming Route53 for domain management with a domain already configured, provisions a 
+S3 bucket when we can store a SPA application, with a Cloudfront distribution as a CDN
+- [ECS-With-LB](templates/ECS-With-LB.yaml): Provisions a ECS cluster with an ALB for balancing traffic. By default, an nginx 
+Docker image is configured for testing purposes
+
 ## Spring Boot app deployment in AWS Elastic Container Service
+
+This section contains a step-by-step guide to configuring a full ECS infrastructure and deployment process. 
 
 Deploying Spring Boot applications into AWS Elastic Container Service can be done simply by calling
 [spring-boot-deploy-ecs.sh](spring-boot-deploy-ecs.sh)
@@ -25,7 +40,6 @@ Required vars that you need to define for each env:
 
    **Note:** You have a template in [ENV-Var-Build.sh](templates/ecs/ENV-Var-Build.sh)
 
-
 4. For each build project created in ECS you need to configure the following environment vars:
    1. `ENV`: The environment (qa, prod, etc...).
    2. `BRANCH`/`TAG`: branch/tag of the base code that will be used to perform the build, by default it will use master.
@@ -33,7 +47,6 @@ Required vars that you need to define for each env:
    4. `KEY_ID`: KMS customer managed key to use to encrypt the build.
    5. `SUBMODULE_BRANCH`: branch of the submodules base code that will be used to perform the build.
    6. `APPS`: space separated string. Each value in this list along with the `ENV` value will be used to find and execute the configuration scripts for each jar that will be generated. More explanation below.
-
 
 5. For each `APP` defined in `APPS` var you need to define a script in `deploy` directory, named `<ENV>-<APP>.sh`. This script will set the corresponding environment variables for the defined `ENV` and `APP`. Required vars that you need to define for each env:
    1. `MODULE_NAME`: module to be build.
