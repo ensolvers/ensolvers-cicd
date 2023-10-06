@@ -59,7 +59,7 @@ for (( i=0; i<SIZE; i++ ))
   # NOTE: maven wrapper is assumed
   # build and normalize jar name - assuming only one output jar
   TARGET_ORIGINAL=target/*.original
-  if [ -f "$TARGET_ORIGINAL"]; then
+  if [ -f "$TARGET_ORIGINAL" ]; then
     rm $TARGET_ORIGINAL
   fi
   mv target/*.jar target/"$JAR_NAME"
