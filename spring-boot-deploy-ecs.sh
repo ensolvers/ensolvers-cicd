@@ -58,6 +58,11 @@ for (( i=0; i<SIZE; i++ ))
 
   # NOTE: maven wrapper is assumed
   # build and normalize jar name - assuming only one output jar
+  ls -la
+  cd target
+  ls -la
+  cd ../
+
   TARGET_ORIGINAL=target/*.original
   if [ -f "$TARGET_ORIGINAL" ]; then
     rm $TARGET_ORIGINAL
