@@ -21,6 +21,8 @@ else
   slack_notification "[${ENV^^}] [$(date +"%H:%M:%S") UTC] - Deploying from tag ${TAG}"
 fi
 
+echo "WEBHOOK SLACK"
+echo $SLACK_WEBHOOK_URL
 slack_notification "[${ENV^^}] [$(date +"%H:%M:%S") UTC] - Building for ${LIST_APPS[*]}"
 
 mvn clean package spring-boot:repackage -DskipTests
@@ -50,7 +52,7 @@ for (( i=0; i<SIZE; i++ ))
   export JAR_FILE_S3_URL="s3://$S3_BUCKET_NAME/$APP_NAME/$JAR_NAME"
 
 
-  export $MODULE_NAME=${MODULE_NAME:-$APP_NAME}
+  export MODULE_NAME=${MODULE_NAME:-$APP_NAME}
   # --------------- Build and Upload to s3 ---------------
   cd $ROOT_DIR/modules/$MODULE_NAME
 
@@ -60,8 +62,6 @@ for (( i=0; i<SIZE; i++ ))
 
   # NOTE: maven wrapper is assumed
   # build and normalize jar name - assuming only one output jar
-  echo "WEBHOOK SLACK"
-  echo $SLACK_WEBHOOK_URL
 
   TARGET_ORIGINAL=target/*.original
   if [ -f "$TARGET_ORIGINAL" ]; then
