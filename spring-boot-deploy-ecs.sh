@@ -39,6 +39,7 @@ SIZE=${#LIST_APPS[*]}
 for (( i=0; i<SIZE; i++ ))
   do
 
+  # Default to LIST_APPS[i] unless MODULE_NAME is set
   export APP_NAME=${LIST_APPS[i]}
 
   echo "Importing variables from ./deploy/${ENV^^}-${APP_NAME}.sh"
@@ -49,6 +50,7 @@ for (( i=0; i<SIZE; i++ ))
   export JAR_FILE_S3_URL="s3://$S3_BUCKET_NAME/$APP_NAME/$JAR_NAME"
 
 
+  export $MODULE_NAME=${MODULE_NAME:-$APP_NAME}
   # --------------- Build and Upload to s3 ---------------
   cd $ROOT_DIR/modules/$MODULE_NAME
 
@@ -58,10 +60,8 @@ for (( i=0; i<SIZE; i++ ))
 
   # NOTE: maven wrapper is assumed
   # build and normalize jar name - assuming only one output jar
-  ls -la
-  cd target
-  ls -la
-  cd ../
+  echo "WEBHOOK SLACK"
+  echo $SLACK_WEBHOOK_URL
 
   TARGET_ORIGINAL=target/*.original
   if [ -f "$TARGET_ORIGINAL" ]; then
