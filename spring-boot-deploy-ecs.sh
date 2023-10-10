@@ -10,6 +10,8 @@ source "$BASEDIR/utils/error_handler_slack_message.sh"
 
 TIME_DEPLOY=$(date +%s)
 LIST_APPS=("$1")
+#Comma separated modules to be tested
+MODULES_TO_TEST=("$2")
 
 echo "Importing variables from $ROOT_DIR/deploy/${ENV^^}-Var-Build.sh"
 build_script="$ROOT_DIR/deploy/${ENV^^}-Var-Build.sh"
@@ -25,7 +27,11 @@ echo "WEBHOOK SLACK"
 echo $SLACK_WEBHOOK_URL
 slack_notification "[${ENV^^}] [$(date +"%H:%M:%S") UTC] - Building for ${LIST_APPS[*]}"
 
-mvn clean package spring-boot:repackage -DskipTests
+if [ -z "$MODULES_TO_TEST" ]; then
+  mvn clean package spring-boot:repackage -DskipTests
+else
+  mvn clean package spring-boot:repackage -DskipTests=false -pl $MODULES_TO_TEST
+fi
 
 ERROR_CODE=$?
 
