@@ -41,7 +41,6 @@ SIZE=${#LIST_APPS[*]}
 for (( i=0; i<SIZE; i++ ))
   do
 
-  # Default to LIST_APPS[i] unless MODULE_NAME is set
   export APP_NAME=${LIST_APPS[i]}
 
   echo "Importing variables from ./deploy/${ENV^^}-${APP_NAME}.sh"
