@@ -15,18 +15,6 @@ S3 bucket when we can store a SPA application, with a Cloudfront distribution as
 - [ECS-With-LB](templates/ECS-With-LB.yaml): Provisions a ECS cluster with an ALB for balancing traffic. By default, an nginx 
 Docker image is configured for testing purposes
 
-## Infrastructure for SPA deployment
-
-This section contains a detailed guide on how to provision the infrastructure for deploying a Single-Page App using S3 and Cloudformation
-
-1. Go to AWS Route53 console, register the domain in Hosted Zone
-2. Go to AWS Certificate Manager and request a certificate for the domain, follow the steps to get the domain validated and the cert issued
-3. Go to CloudFormation console, create a new stack using [Frontend.yaml](templates/Frontend.yaml) template
-4. Enter the following details
-- Hosted Zone: same zone that was registered in Step 1
-- Subdomain: the desired subdomain - if we want to host the app on the root domain (no subdomain) no worries, we can configure it later
-- AcmCertificateArn: use the ARN of the certificate issued in (3)
-
 
 ## Spring Boot app deployment in AWS Elastic Container Service
 
@@ -82,6 +70,21 @@ Required vars that you need to define for each env:
    ...
    ```
 ## React app deployment into S3 bucket
+
+This section contains a detailed guide on how to provision infrastructure for hosting a React app and serve it via a CDN. Let's start with the infrastructure
+
+### Infrastructure for SPA deployment
+
+
+1. Go to AWS Route53 console, register the domain in Hosted Zone
+2. Go to AWS Certificate Manager and request a certificate for the domain, follow the steps to get the domain validated and the cert issued
+3. Go to CloudFormation console, create a new stack using [Frontend.yaml](templates/Frontend.yaml) template
+4. Enter the following details
+- Hosted Zone: same zone that was registered in Step 1
+- Subdomain: the desired subdomain - if we want to host the app on the root domain (no subdomain) no worries, we can configure it later
+- AcmCertificateArn: use the ARN of the certificate issued in (3)
+
+### Deployment process
 
 The script [deploy-react-app-to-s3.sh](deploy-react-app-to-s3.sh) allows to build and deploy React applications to S3 buckets - that can be distributed via Cloudfront.
 
