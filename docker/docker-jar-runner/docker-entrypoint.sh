@@ -1,5 +1,6 @@
 #!/bin/bash
 echo "Ensolvers Runner v0.1"
+echo "This should be printed if the deploy script checks out to the branches that the main repo points to"
 
 if [[ ! -z $JAR_FILE_S3_URL ]]; then
     echo "Fetching [$JAR_FILE_S3_URL]"
