@@ -1,6 +1,14 @@
 #!/bin/bash
 echo "Ensolvers Runner v0.1"
-echo "This should be printed if the deploy script checks out to the branches that the main repo points to"
+
+stop_java() {
+    echo "Received signal. Stopping Java application..."
+    kill -TERM $java_pid
+    wait $java_pid
+    exit $?
+}
+
+trap 'stop_java' SIGINT SIGTERM
 
 if [[ ! -z $JAR_FILE_S3_URL ]]; then
     echo "Fetching [$JAR_FILE_S3_URL]"
@@ -11,7 +19,10 @@ if [[ ! -z $JAR_FILE_S3_URL ]]; then
         NEW_RELIC_VERSION="$(java -jar /newrelic.jar -v)"
         echo "Running with New Relic version $NEW_RELIC_VERSION, license_key: [$NEW_RELIC_LICENSE_KEY], app_name: [$NEW_RELIC_APP_NAME]"
         java -javaagent:/newrelic.jar -Dnewrelic.config.license_key=$NEW_RELIC_LICENSE_KEY -Dnewrelic.config.app_name=$NEW_RELIC_APP_NAME $JVM_PARAMS -jar /app.jar
-    else 
-        java $JVM_PARAMS -jar /app.jar
+    else
+        java $JVM_PARAMS -jar /app.jar &
     fi
+    java_pid=$!
+
+    wait $java_pid
 fi 
