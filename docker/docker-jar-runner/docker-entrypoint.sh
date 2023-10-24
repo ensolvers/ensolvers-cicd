@@ -11,8 +11,10 @@ stop_java() {
 
 trap 'stop_java' SIGINT SIGTERM
 
+echo "running test.sh..."
 /test.sh &
 test_pid=$!
+echo "test.sh PID: $test_pid"
 
 if [[ ! -z $JAR_FILE_S3_URL ]]; then
     echo "Fetching [$JAR_FILE_S3_URL]"
@@ -28,5 +30,6 @@ if [[ ! -z $JAR_FILE_S3_URL ]]; then
         java $JVM_PARAMS -jar /app.jar &
         java_pid=$!
     fi
+    echo "Java PID: $java_pid"
     wait $java_pid
 fi 
