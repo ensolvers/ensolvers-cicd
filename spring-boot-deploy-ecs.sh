@@ -4,7 +4,9 @@ set -e
 BASEDIR=$(dirname "$0")
 
 #load utils
+echo "sourcing slack_notification.sh"
 source "$BASEDIR/utils/slack_notification.sh"
+echo "sourcing error_handler_slack_message.sh"
 source "$BASEDIR/utils/error_handler_slack_message.sh"
 
 
