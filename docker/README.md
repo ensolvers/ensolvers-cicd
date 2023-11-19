@@ -7,3 +7,5 @@ This folder contains a set of userful docker images for building and running app
 - `docker-java-builder`: A Docker image meant to provide all the tooling required for build Java apps, customizable to any version of Java required
 
 - `docker-java-sonarcloud`: A Docker image meant to easily run code analysis and upload it to SonarCloud
+
+- `ensolvers-frontend-build`: A Docker image that can be use to build frontent apps (React, Next.js, Vue.js, etc.)
