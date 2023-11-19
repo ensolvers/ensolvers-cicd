@@ -6,7 +6,7 @@ ENV DEBIAN_FRONTEND=noninteractive
 
 # Update package lists and install dependencies
 RUN apt-get update && \
-    apt-get install -y curl python3 python3-pip gettext jq
+    apt-get install -y curl python3 python3-pip gettext jq git
 
 # Install NVM
 RUN curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.1/install.sh | bash

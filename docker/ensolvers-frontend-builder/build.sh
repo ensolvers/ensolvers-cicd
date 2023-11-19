@@ -1,1 +1,1 @@
-docker build --platform linux/arm64 -t ensolvers-frontend-builder .
+docker build --platform linux/amd64 -t ensolvers-frontend-builder .

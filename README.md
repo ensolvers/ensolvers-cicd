@@ -15,6 +15,11 @@ S3 bucket when we can store a SPA application, with a Cloudfront distribution as
 - [ECS-With-LB](templates/ECS-With-LB.yaml): Provisions a ECS cluster with an ALB for balancing traffic. By default, an nginx 
 Docker image is configured for testing purposes
 
+## Docker images
+
+This repo features a set of Docker images that we use for different purposes - from deployment and general task to running apps in production.
+
+Documentation can be found [here](/docker/README.md)
 
 ## Spring Boot app deployment in AWS Elastic Container Service
 
