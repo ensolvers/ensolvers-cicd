@@ -5,7 +5,7 @@ const eventUrl = Cypress.env('url');
 describe('Test google search', () => {
   beforeEach(() => {
     cy.visit('https://google.com')
-      .wait(1000);
+      .wait(2000);
   })
 
   it('search', () => {
@@ -14,7 +14,7 @@ describe('Test google search', () => {
         .type('site:' + eventUrl )
         .type('{enter}');
 
-      cy.wait(1000);
+      cy.wait(3000);
 
       cy.get('div#search').find('a[href*="' + eventUrl + '"]').should('exist');
     });

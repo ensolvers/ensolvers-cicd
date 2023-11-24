@@ -40,7 +40,7 @@ while IFS=',' read -ra row; do
     url=${row[0]}
     echo "Running test for URL: $url"
 
-    cypress_output=$(npx cypress run --browser chrome --spec cypress/e2e/spec.cy.js --env url="$url" 2>&1)
+    cypress_output=$(npx cypress run --browser chrome --headed --spec cypress/e2e/spec.cy.js --env url="$url" 2>&1)
     cypress_exit_code=$?
 
     if [ $cypress_exit_code -ne 0 ]; then
