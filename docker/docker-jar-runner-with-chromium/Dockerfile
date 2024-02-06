@@ -1,9 +1,15 @@
 FROM ubuntu:22.04
 ARG timezone
 ENV TZ=${timezone}
+
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 RUN apt update
 RUN apt install -y openjdk-17-jdk awscli mysql-client wget
+
+RUN apt-get update && apt-get install -y gnupg2
+
+# Set default value for the CHROME_VERSION_URL
+ARG CHROME_VERSION_URL="https://googlechromelabs.github.io/chrome-for-testing/LATEST_RELEASE_STABLE"
 
 # Install the latest version of Google Chrome
 RUN apt-get update && apt-get install -y wget
@@ -11,9 +17,12 @@ RUN wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key
 RUN sh -c 'echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google.list'
 RUN apt-get update && apt-get install -y google-chrome-stable
 
+RUN apt-get update && apt-get install -y unzip
+
 # Install the latest version of Chrome Driver
-RUN wget -q -O /tmp/chromedriver.zip https://chromedriver.storage.googleapis.com/LATEST_RELEASE
-RUN unzip /tmp/chromedriver.zip chromedriver -d /usr/local/bin/
+RUN CHROME_VERSION=$(wget -qO- ${CHROME_VERSION_URL}) \
+    && wget -q -O /tmp/chromedriver-linux64.zip https://edgedl.me.gvt1.com/edgedl/chrome/chrome-for-testing/${CHROME_VERSION}/linux64/chromedriver-linux64.zip
+RUN unzip /tmp/chromedriver-linux64.zip -d /usr/local/bin/
 
 # Install the latest version of Chromium Browser
 RUN apt-get update && apt-get install -y chromium-browser
