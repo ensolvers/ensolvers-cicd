@@ -11,10 +11,6 @@ RUN apt-get update && apt-get install -y gnupg2
 # Set default value for the CHROME_VERSION_URL
 ARG CHROME_VERSION_URL="https://googlechromelabs.github.io/chrome-for-testing/LATEST_RELEASE_STABLE"
 
-# Run wget to download Chrome version and store it in a variable
-RUN CHROME_VERSION=$(wget -qO- ${CHROME_VERSION_URL}) \
-    && echo "Chrome version: ${CHROME_VERSION}"
-
 # Install the latest version of Google Chrome
 RUN apt-get update && apt-get install -y wget
 RUN wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key add -
