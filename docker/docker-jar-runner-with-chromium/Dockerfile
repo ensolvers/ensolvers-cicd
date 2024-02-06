@@ -15,7 +15,7 @@ RUN sh -c 'echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable 
 RUN apt-get update && apt-get install -y google-chrome-stable=${CHROME_VERSION}-1
 
 # Install the latest version of Chrome Driver
-RUN wget -q -O /tmp/chromedriver.zip https://chromedriver.storage.googleapis.com/${CHROME_VERSION}/chromedriver_linux64.zip
+RUN wget -q -O /tmp/chromedriver.zip https://edgedl.me.gvt1.com/edgedl/chrome/chrome-for-testing/${CHROME_VERSION}/linux64/chromedriver-linux64.zip
 RUN unzip /tmp/chromedriver.zip chromedriver -d /usr/local/bin/
 
 # Install the latest version of Chromium Browser
