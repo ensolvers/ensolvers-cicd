@@ -49,7 +49,11 @@ fi
 # Run tests. Make sure to let the maven test failure *after* the verify instruction on the command.
 echo "Running tests"
 if [[ $# -eq 5 ]] ; then
-  mvn clean org.jacoco:jacoco-maven-plugin:$jacoco_version:prepare-agent verify -Dmaven.test.failure.ignore=true org.jacoco:jacoco-maven-plugin:$jacoco_version:report
+  if [ -z "$PACKAGE_NAME_SONAR_CLOUD" ] ; then
+    mvn clean org.jacoco:jacoco-maven-plugin:$jacoco_version:prepare-agent verify -Dmaven.test.failure.ignore=true org.jacoco:jacoco-maven-plugin:$jacoco_version:report
+  else
+    mvn clean -Dtest="$PACKAGE_NAME_SONAR_CLOUD".**.* org.jacoco:jacoco-maven-plugin:$jacoco_version:prepare-agent verify -Dmaven.test.failure.ignore=true org.jacoco:jacoco-maven-plugin:$jacoco_version:report
+  fi
 else
   mvn test -Dtest="$PACKAGE_NAME".**.* -DfailIfNoTests=false
 fi
