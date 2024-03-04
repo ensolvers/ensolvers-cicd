@@ -6,6 +6,7 @@ RUN apt update
 RUN apt install -y openjdk-17-jdk awscli mysql-client wget
 
 COPY docker-entrypoint.sh /docker-entrypoint.sh
-RUN wget https://download.newrelic.com/newrelic/java-agent/newrelic-agent/8.0.1/newrelic-agent-8.0.1.jar -O /newrelic.jar
+# DOWNLOAD LAST NEW RELIC VERSION
+RUN wget https://download.newrelic.com/newrelic/java-agent/newrelic-agent/current/newrelic-agent.jar -O /newrelic.jar
 
 CMD ["./docker-entrypoint.sh"]
