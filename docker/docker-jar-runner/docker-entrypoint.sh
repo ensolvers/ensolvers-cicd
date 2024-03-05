@@ -1,7 +1,19 @@
 #!/bin/bash
-echo "Ensolvers Runner v0.1"
+echo "Ensolvers Runner v1.0"
+
+echo ""
+echo "---------------------- Java version (java --version) ----------------------"
+java --version
+echo ""
+
+echo "Local date: $(date)"
+echo ""
 
 if [[ ! -z $JAR_FILE_S3_URL ]]; then
+    if [[ ! -z $NEW_RELIC_LICENSE_KEY ]]; then
+      echo "Starting new relic infrastructure agent"
+      /usr/bin/newrelic-infra-service > /dev/null 2>&1 &
+    fi
     echo "Fetching [$JAR_FILE_S3_URL]"
     aws s3 cp $JAR_FILE_S3_URL /app.jar
     
