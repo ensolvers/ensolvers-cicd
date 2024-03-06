@@ -5,7 +5,13 @@ root_dir="$1"
 update_submodules() {
     cd "$1" || exit
     echo "Replacing SSH to HTTPS on [$1/.gitmodules]"
-    sed -i "s|git@github.com:|https://github.com/|g" .gitmodules
+
+    if [ "$(uname)" == "Darwin" ]; then
+        sed -i '' "s|git@github.com:|https://github.com/|g" .gitmodules
+    else
+        sed -i "s|git@github.com:|https://github.com/|g" .gitmodules
+    fi
+
     git submodule update --init
 }
 
