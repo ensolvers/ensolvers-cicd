@@ -1,6 +1,7 @@
 #!/bin/bash
 
 root_dir="$1"
+absolute_path=$(realpath $root_dir)
 
 update_submodules() {
     cd "$1" || exit
@@ -18,5 +19,6 @@ update_submodules() {
 find "$root_dir" -type f -name ".gitmodules" | while read -r file; do
     dir=$(dirname "$file")
     echo "Fetching submodule [$dir]..."
+    cd $absolute_path
     update_submodules "$dir"
 done
