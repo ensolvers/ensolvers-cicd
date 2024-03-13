@@ -29,10 +29,15 @@ echo "WEBHOOK SLACK"
 echo $SLACK_WEBHOOK_URL
 slack_notification "[${ENV^^}] [$(date +"%H:%M:%S") UTC] - Building for ${LIST_APPS[*]}"
 
+CLEAN_CMD="clean"
+if [ "$SKIP_CLEAN_REPACKAGE" = "true" ]; then
+  CLEAN_CMD=""
+fi
+
 if [ -z "$MODULES_TO_TEST" ]; then
-  mvn clean package spring-boot:repackage -DskipTests
+  mvn $CLEAN_CMD package spring-boot:repackage -DskipTests
 else
-  mvn clean package spring-boot:repackage -DskipTests=false -pl $MODULES_TO_TEST
+  mvn $CLEAN_CMD package spring-boot:repackage -DskipTests=false -pl $MODULES_TO_TEST
 fi
 
 ERROR_CODE=$?
