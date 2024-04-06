@@ -31,7 +31,8 @@ cd "$APP_PATH"
 rm -rf $BUILD_PATH
 cp src/environment.json src/environment-backup.json
 cp src/$ENVIRONMENT_FILE src/environment.json
-cp src/$ENVIRONMENT_FILE src/external/fox-typescript/environment.json
+cp src/$ENVIRONMENT_FILE src/external/ensolvers-core-frontend-mui-v5/submodules/fox-typescript/environment.json
+
 echo "{\"version\": \"$(date '+%Y-%m-%d %H:%M:%S')\"}" > public/version.json # TODO to be replaced by automatic tagging script
 yarn install
 yarn build
