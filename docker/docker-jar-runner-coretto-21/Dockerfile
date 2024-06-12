@@ -8,7 +8,7 @@ RUN yum update -y && \
     unzip newrelic-java.zip -d /opt && \
     rm newrelic-java.zip
 
-# Set the timezone to UTC
+# Configures the timezone passed via the `timezone` arg
 ARG timezone
 ENV zoneinfo=/usr/share/zoneinfo/${timezone}
 RUN [ -f $zoneinfo ] || (echo "zoneinfo not found for timezone: $timezone" && exit 1) && \ 
