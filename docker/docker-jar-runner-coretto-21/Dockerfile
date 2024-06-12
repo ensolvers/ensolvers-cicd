@@ -8,6 +8,9 @@ RUN yum update -y && \
     unzip newrelic-java.zip -d /opt && \
     rm newrelic-java.zip
 
+# Set the timezone to UTC
+RUN ln -sf /usr/share/zoneinfo/UTC /etc/localtime
+
 COPY docker-entrypoint.sh /docker-entrypoint.sh
     
 # Expose the application port (modify as needed)
