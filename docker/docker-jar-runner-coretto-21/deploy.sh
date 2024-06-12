@@ -7,8 +7,7 @@ if [[ -z $repo ]]; then
     exit 1;
 fi
 
-tag=$(git rev-parse HEAD)
+./build.sh $timezone
 
-docker build . -t jar-runner-coretto-21:$tag --build-arg timezone=$timezone
 docker tag jar-runner-coretto-21:$tag $repo:$tag
 docker push $repo:$tag

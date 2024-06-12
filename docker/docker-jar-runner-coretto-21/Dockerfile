@@ -9,7 +9,11 @@ RUN yum update -y && \
     rm newrelic-java.zip
 
 # Set the timezone to UTC
-RUN ln -sf /usr/share/zoneinfo/UTC /etc/localtime
+ARG timezone
+ENV zoneinfo=/usr/share/zoneinfo/${timezone}
+RUN [ -f $zoneinfo ] || (echo "zoneinfo not found for timezone: $timezone" && exit 1) && \ 
+    ln -snf $zoneinfo /etc/localtime && \ 
+    echo $timezone > /etc/timezone
 
 COPY docker-entrypoint.sh /docker-entrypoint.sh
     
