@@ -50,7 +50,7 @@ fi
 echo "Running tests"
 if [[ $# -eq 5 ]] ; then
   if [ -z "$PACKAGE_NAME_SONAR_CLOUD" ] ; then
-    mvn clean org.jacoco:jacoco-maven-plugin:$jacoco_version:prepare-agent verify -Dmaven.test.failure.ignore=true org.jacoco:jacoco-maven-plugin:$jacoco_version:report
+    mvn clean org.jacoco:jacoco-maven-plugin:$jacoco_version:prepare-agent verify -Dmaven.test.failure.ignore="${JACOCO_IGNORE_TEST_FAILURE:-true}" org.jacoco:jacoco-maven-plugin:$jacoco_version:report
   else
     mvn clean -Dtest="$PACKAGE_NAME_SONAR_CLOUD".**.* -DfailIfNoTests=false org.jacoco:jacoco-maven-plugin:$jacoco_version:prepare-agent verify -Dmaven.test.failure.ignore=true org.jacoco:jacoco-maven-plugin:$jacoco_version:report
   fi
