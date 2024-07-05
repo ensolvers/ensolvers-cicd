@@ -12,6 +12,11 @@ PACKAGE_NAME=$3
 SONAR_TOKEN=$4
 SONAR_PROJECT_KEY=$5
 
+# For apps with tests in different modules we need to output the results to a common folder
+if ! [ -z "$SUREFIRE_MULTIMODULE_REPORTS_PATH" ] ; then
+  REPORTS_DIR=$SUREFIRE_MULTIMODULE_REPORTS_PATH
+fi
+
 #load utils
 source "$BASEDIR/utils/slack_notification.sh"
 
@@ -50,7 +55,7 @@ fi
 echo "Running tests"
 if [[ $# -eq 5 ]] ; then
   if [ -z "$PACKAGE_NAME_SONAR_CLOUD" ] ; then
-    mvn clean org.jacoco:jacoco-maven-plugin:$jacoco_version:prepare-agent verify -Dmaven.test.failure.ignore="${JACOCO_IGNORE_TEST_FAILURE:-true}" org.jacoco:jacoco-maven-plugin:$jacoco_version:report
+    mvn clean org.jacoco:jacoco-maven-plugin:$jacoco_version:prepare-agent verify -Dmaven.test.failure.ignore="${JACOCO_IGNORE_TEST_FAILURE:-true}" org.jacoco:jacoco-maven-plugin:$jacoco_version:report -Dsurefire.reports.directory="$SUREFIRE_MULTIMODULE_REPORTS_PATH"
   else
     mvn clean -Dtest="$PACKAGE_NAME_SONAR_CLOUD".**.* -DfailIfNoTests=false org.jacoco:jacoco-maven-plugin:$jacoco_version:prepare-agent verify -Dmaven.test.failure.ignore="${JACOCO_IGNORE_TEST_FAILURE:-true}" org.jacoco:jacoco-maven-plugin:$jacoco_version:report
   fi
