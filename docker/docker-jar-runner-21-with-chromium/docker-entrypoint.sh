@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 echo "Ensolvers Runner v0.2 - Based on amazoncoretto:21"
 
 if [[ ! -z $JAR_FILE_S3_URL ]]; then

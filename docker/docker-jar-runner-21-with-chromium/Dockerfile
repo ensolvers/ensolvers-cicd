@@ -2,7 +2,7 @@
 FROM amazoncorretto:21-alpine3.20
 
 # Install the New Relic agent and AWS CLI
-RUN apk add --no-cache wget unzip tzdata && \
+RUN apk add --no-cache wget unzip tzdata dos2unix && \
     wget https://download.newrelic.com/newrelic/java-agent/newrelic-agent/current/newrelic-java.zip && \
     unzip newrelic-java.zip -d /opt && \
     rm newrelic-java.zip && \
@@ -11,16 +11,10 @@ RUN apk add --no-cache wget unzip tzdata && \
     ./aws/install && \
     rm -rf awscliv2.zip aws/
 
-# Ensure AWS CLI is in the PATH
-ENV PATH="/usr/local/bin:$PATH"
-
 # Install dependencies for Chromium
 RUN apk add --no-cache \
     chromium \
     chromium-chromedriver
-
-# Set the path to Chrome Driver in your code
-ENV PATH="/usr/lib/chromium:$PATH"
 
 # Clean up
 RUN rm -rf /var/cache/apk/*
@@ -33,7 +27,8 @@ RUN [ -f $zoneinfo ] || (echo "zoneinfo not found for timezone: $timezone" && ex
     echo $timezone > /etc/timezone
 
 COPY docker-entrypoint.sh /docker-entrypoint.sh
-    
+RUN dos2unix /docker-entrypoint.sh && chmod +x /docker-entrypoint.sh
+
 # Expose the application port (modify as needed)
 EXPOSE 8080
 
