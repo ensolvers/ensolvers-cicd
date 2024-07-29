@@ -3,6 +3,9 @@
 root_dir="$1"
 absolute_path=$(realpath $root_dir)
 
+echo "PWD: [$(pwd)]"
+echo "Root dir: [$root_dir]. Absolute path: $absolute_path"
+
 update_submodules() {
     cd "$1" || exit
     echo "Replacing SSH to HTTPS on [$1/.gitmodules]"
