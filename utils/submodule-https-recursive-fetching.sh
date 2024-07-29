@@ -1,6 +1,7 @@
 #!/bin/bash
 
 root_dir="$1"
+skip_cd_absolute_path="$2"
 absolute_path=$(realpath $root_dir)
 
 echo "PWD: [$(pwd)]"
@@ -22,6 +23,8 @@ update_submodules() {
 find "$root_dir" -type f -name ".gitmodules" | while read -r file; do
     dir=$(dirname "$file")
     echo "Fetching submodule [$dir]..."
-    cd $absolute_path
+    if [[ -z $skip_cd_absolute_path ]]; then
+      cd $absolute_path
+    fi
     update_submodules "$dir"
 done
