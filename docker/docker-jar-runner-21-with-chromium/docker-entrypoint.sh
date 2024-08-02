@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 echo "Ensolvers Runner v0.2 - Based on Ubuntu 22"
 
 if [[ ! -z $JAR_FILE_S3_URL ]]; then

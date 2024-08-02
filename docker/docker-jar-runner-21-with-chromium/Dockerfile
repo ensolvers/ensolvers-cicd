@@ -31,6 +31,10 @@ RUN apt-get update && apt-get install -y chromium-browser
 ENV PATH="/usr/local/bin:${PATH}"
 
 COPY docker-entrypoint.sh /docker-entrypoint.sh
+
+RUN apt-get install dos2unix
+
+RUN dos2unix /docker-entrypoint.sh && chmod +x /docker-entrypoint.sh
 RUN wget https://download.newrelic.com/newrelic/java-agent/newrelic-agent/current/newrelic-agent.jar -O /newrelic.jar
 
-CMD ["./docker-entrypoint.sh"]
+CMD ["/docker-entrypoint.sh"]
