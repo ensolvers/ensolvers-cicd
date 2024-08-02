@@ -11,5 +11,5 @@ fi
 
 tag=$(git rev-parse HEAD)
 
-docker tag jar-runner-coretto-21-alpine:$tag $repo:$tag
+docker tag jar-runner-ubuntu-21-chromium:$tag $repo:$tag
 docker push $repo:$tag

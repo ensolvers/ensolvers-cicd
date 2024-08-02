@@ -1,5 +1,5 @@
 #!/bin/sh
-echo "Ensolvers Runner v0.2 - Based on amazoncoretto:21"
+echo "Ensolvers Runner v0.2 - Based on Ubuntu 22"
 
 if [[ ! -z $JAR_FILE_S3_URL ]]; then
     echo "Fetching [$JAR_FILE_S3_URL]"
