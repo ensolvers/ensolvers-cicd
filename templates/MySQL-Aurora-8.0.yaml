@@ -44,11 +44,11 @@ Parameters:
     Type: AWS::EC2::Subnet::Id
 
   09EncryptionKey:
-    Description: "Key to be used for encryption on DB - CF doesn't support query, must be copied manually"
+    Description: "Key to be used for encryption on DB - Must be created in KMS"
     Type: String
 
   10EC2KeyPair:
-    Description: "Key to connect with SSH to EC2 - KeyPair must be created beforehand"
+    Description: "Key to connect with SSH to EC2 - KeyPair must be created beforehand in EC2"
     Type: String
 
   11EC2AMI:
@@ -65,7 +65,15 @@ Parameters:
     Description: "Instance type of the RDS instance in the cluster. By default, a db.r5.large will be used"
     Type: String
     Default: db.r5.large
-
+    AllowedValues: 
+      - db.t3.micro
+      - db.t3.small
+      - db.t3.medium
+      - db.t3.large
+      - db.r5.large
+      - db.r5.xlarge
+      - db.r5.2xlarge
+    ConstraintDescription: "Must be a valid DB instance type."
 
 Resources:
 
