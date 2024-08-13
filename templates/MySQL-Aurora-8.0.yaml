@@ -57,9 +57,9 @@ Parameters:
     Default: ami-04505e74c0741db8d
   
   12EC2InstanceType:
-    Description: "Instance type of the EC2 BastionBox. By default, an t3.micro will be used"
+    Description: "Instance type of the EC2 BastionBox"
     Type: String
-    Default: t3.micro
+    Default: t4g.nano
     
   13DBInstanceType:
     Description: "Instance type of the RDS instance in the cluster. By default, a db.r5.large will be used"
