@@ -1,0 +1,19 @@
+version: 0.2
+
+phases:
+  install:
+    runtime-versions:
+      # Install proper runtime: https://docs.aws.amazon.com/codebuild/latest/userguide/available-runtimes.html
+
+  build:
+    commands:
+      - echo Build started on `date`
+      - ./build.sh
+
+  post_build:
+    commands:
+      - echo Build completed on `date`
+
+artifacts:
+  files:
+    - '**/*'
