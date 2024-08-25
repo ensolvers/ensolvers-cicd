@@ -1,9 +1,0 @@
-# CodeBuild BuildSpec file, this will install all the tools needed to deploy the app
-
-version: 0.2
-
-phases:
-  build:
-    commands:
-      - ROOT_DIR=$PWD
-      - bash ./wordpress-deploy-ecs.sh
