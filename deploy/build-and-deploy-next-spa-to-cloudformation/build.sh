@@ -63,7 +63,7 @@ npm run export
 
 # Sync the build directory to the S3 bucket
 echo "Uploading to S3..."
-aws s3 sync $DIST_DIR s3://$S3_BUCKET_NAME --delete
+aws s3 sync $DIST_DIR s3://$S3_BUCKET_NAME --delete --acl public-read
 
 # Invalidate CloudFront cache
 echo "Invalidating CloudFront cache..."
