@@ -1,2 +1,2 @@
-commit_info=$(git log -1 --format="*Hash:* %H \n*Author:* %an \n*Message:* %s" ${{ github.sha }})
+commit_info=$(git log -1 --format="*Hash:* %H \n*Author:* %an \n*Message:* %s" "$2")
 curl -X POST -d "{'text':':alert-red: $1 failed :alert-red:\n\n:hammer: Commit info:\n$commit_info'}" "$SLACK_WEBHOOK_URL"
