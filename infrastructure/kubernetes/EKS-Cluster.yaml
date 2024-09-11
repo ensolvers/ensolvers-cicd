@@ -1,0 +1,112 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: CloudFormation template for EKS cluster on Fargate with logging enabled
+
+Parameters:
+  SubnetA:
+    Type: AWS::EC2::Subnet::Id
+    Description: 'Subnet A ID for EKS Cluster'
+
+  SubnetB:
+    Type: AWS::EC2::Subnet::Id
+    Description: 'Subnet B ID for EKS Cluster'
+
+  VpcId:
+    Type: AWS::EC2::VPC::Id
+    Description: VPC ID where the EKS cluster will be deployed
+
+  AvailabilityZones:
+    Type: List<AWS::EC2::AvailabilityZone::Name>
+    Description: List of Availability Zones for the EKS cluster
+
+  ClusterName:
+    Type: String
+    Default: AMX-PBI-COL-Cluster
+    Description: Name of the EKS cluster, used as a prefix for resources
+    AllowedPattern: '^[a-zA-Z][a-zA-Z0-9-]*$'
+    ConstraintDescription: Must be a valid DNS-1123 subdomain name
+
+  Environment:
+    Type: String
+    Description: Environment name, used as a prefix for resources (QA, PROD, DES)
+    AllowedValues:
+      - prod
+      - qa
+      - dev
+    Default: dev
+
+Resources:
+  EKSClusterRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub "${Environment}-${ClusterName}-eks-cluster-role"
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: eks.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/AmazonEKSClusterPolicy
+        - arn:aws:iam::aws:policy/AmazonEKSServicePolicy
+
+  EKSCluster:
+    Type: AWS::EKS::Cluster
+    Properties:
+      Name: !Sub "${Environment}-${ClusterName}-eks-cluster"
+      Version: "1.30"
+      RoleArn: !GetAtt EKSClusterRole.Arn
+      ResourcesVpcConfig:
+        SubnetIds:
+          - !Ref SubnetA
+          - !Ref SubnetB
+        EndpointPublicAccess: true
+        EndpointPrivateAccess: false
+      Logging:
+        ClusterLogging:
+          EnabledTypes: 
+            - Type: api
+            - Type: audit
+            - Type: authenticator
+            - Type: controllerManager
+            - Type: scheduler
+
+  FargateProfile:
+    Type: AWS::EKS::FargateProfile
+    Properties:
+      ClusterName: !Ref EKSCluster
+      FargateProfileName: !Sub "${Environment}-${ClusterName}-fargate-profile"
+      PodExecutionRoleArn: !GetAtt FargatePodExecutionRole.Arn
+      Subnets:
+        - !Ref SubnetA
+        - !Ref SubnetB
+      Selectors:
+        - Namespace: kube-system
+#          Labels:
+#            - Key: "app"
+#              Value: "nginx"
+#            - Key: "k8s-app"
+#              Value: "kube-dns"
+
+  FargatePodExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub "${Environment}-${ClusterName}-fargate-pod-execution-role"
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: eks-fargate-pods.amazonaws.com
+            Action: sts:AssumeRole  
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/AmazonEKSFargatePodExecutionRolePolicy
+
+Outputs:
+  ClusterName:
+    Description: The name of the EKS cluster
+    Value: !Ref EKSCluster
+
+  FargateProfileName:
+    Description: The name of the Fargate profile
+    Value: !Ref FargateProfile

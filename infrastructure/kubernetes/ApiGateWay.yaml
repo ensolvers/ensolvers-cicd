@@ -1,0 +1,76 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Parameters:
+  
+  VpcLinkName:
+    Type: String
+    Description: "Name of the vpc link"
+    
+  VpcSubnetIds:
+    Type: List<AWS::EC2::Subnet::Id>
+    Description: "List of Subnet IDs for VpcLink (Same private subnets where the Load balancer is)"
+    
+  HttpApiName:
+    Type: String
+    Description: "Name of the http api"
+    
+  LoadBalancerArn:
+    Type: String
+    Description: "ARN of the existing Load Balancer to use with the VPC Link"
+    AllowedPattern: "^arn:aws:elasticloadbalancing:.*:.*:loadbalancer/app/.*"
+    ConstraintDescription: "Must be a valid ARN for an existing Load Balancer"
+    
+  LoadBalancerListenerArn:
+    Type: String
+    Description: "ARN of the existing Load Balancer Listener to use with the VPC Link"
+    AllowedPattern: "^arn:aws:elasticloadbalancing:.*:.*:listener/app/.*"
+    ConstraintDescription: "Must be a valid ARN for an existing Load Balancer"
+
+Resources:
+  
+  VpcLink:
+    Type: AWS::ApiGatewayV2::VpcLink
+    Properties:
+      Name: !Ref VpcLinkName
+      SubnetIds: !Ref VpcSubnetIds
+
+  HttpApi:
+    Type: AWS::ApiGatewayV2::Api
+    Properties:
+      Name: !Ref HttpApiName
+      Description: "API Gateway for accessing private ALB"
+      ProtocolType: HTTP
+      
+  Integration:
+    Type: AWS::ApiGatewayV2::Integration
+    Properties:
+      ApiId: !Ref HttpApi
+      ConnectionId: !Ref VpcLink
+      ConnectionType: "VPC_LINK"
+      Description: "Integration for VPC Link for connecting API Gateway to Load Balancer"
+      IntegrationType: HTTP_PROXY
+      IntegrationMethod: ANY
+      IntegrationUri: !Ref LoadBalancerListenerArn
+      PayloadFormatVersion: "1.0"
+      
+  ApiRoute:
+    Type: AWS::ApiGatewayV2::Route
+    Properties:
+      ApiId: !Ref HttpApi
+      RouteKey: 'ANY /'
+      Target: !Join
+        - /
+        - - integrations
+          - !Ref Integration
+            
+  ApiStage:
+    Type: AWS::ApiGatewayV2::Stage
+    Properties:
+      ApiId: !Ref HttpApi
+      AutoDeploy: true
+      Description: "Default deploy stage"
+      StageName: "$default"
+      
+Outputs:
+  ApiEndpoint:
+    Description: 'The URL of the API Gateway endpoint'
+    Value: !GetAtt HttpApi.ApiEndpoint
