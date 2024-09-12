@@ -2,6 +2,10 @@ AWSTemplateFormatVersion: '2010-09-09'
 Description: CloudFormation template for EKS cluster on Fargate with logging enabled
 
 Parameters:
+  VpcId:
+    Type: AWS::EC2::VPC::Id
+    Description: VPC ID where the EKS cluster will be deployed
+
   SubnetA:
     Type: AWS::EC2::Subnet::Id
     Description: 'Subnet A ID for EKS Cluster'
@@ -9,10 +13,6 @@ Parameters:
   SubnetB:
     Type: AWS::EC2::Subnet::Id
     Description: 'Subnet B ID for EKS Cluster'
-
-  VpcId:
-    Type: AWS::EC2::VPC::Id
-    Description: VPC ID where the EKS cluster will be deployed
 
   AvailabilityZones:
     Type: List<AWS::EC2::AvailabilityZone::Name>
