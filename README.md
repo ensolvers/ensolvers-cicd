@@ -2,6 +2,20 @@
 
 This project includes a series of scripts and utils to simplify CI/CD processes, including app building, testing, etc.
 
+## Backend infrastructure provisioning
+
+- Regaring computing provisioning in AWS, we suggest to use EKS with Fargate. Steps and templates [can be found here](infrastructure/kubernetes/README.md). 
+- For DB support, we suggest to use one of our templates for creating Aurora clusters
+   - [MySQL-Aurora-8.0](templates/MySQL-Aurora-8.0.yaml): provision a MySQL 8.0-based RDS Aurora cluster
+
+## Frontend infrastructure provisioning
+
+We use Next.js as our default tech stack for frontend. 
+
+For apps that include server-side rendering, we strongly suggest to use [Vercel](https://vercel.com) or another OOTB, scalable solution like [Cloudflare](https://developers.cloudflare.com/pages/framework-guides/nextjs/ssr/)
+
+For apps that can be compiled into static sites, we have [our custom solution including S3, Cloudformation and S3](infrastructure/spa/README.md)
+
 ## General Cloudformation Templates
 
 One of the key components that this repo includes is a set of Cloudformation templates that simplifies provisioning
@@ -9,7 +23,6 @@ infrastructure. Some of them are listed below:
 
 - [MySQL-Instance-5.7](templates/MySQL-Instance-5.7.yaml): provision a MySQL 5.7 RDS instance
 - [MySQL-Aurora-5.7](templates/MySQL-Aurora-5.7.yaml): provision a MySQL 5.7-based RDS Aurora cluster
-- [MySQL-Aurora-8.0](templates/MySQL-Aurora-8.0.yaml): provision a MySQL 8.0-based RDS Aurora cluster
 - [Frontend](templates/Frontend.yaml): Assuming Route53 for domain management with a domain already configured, provisions a 
 S3 bucket when we can store a SPA application, with a Cloudfront distribution as a CDN
 - [ECS-With-LB](templates/ECS-With-LB.yaml): Provisions a ECS cluster with an ALB for balancing traffic. By default, an nginx 
@@ -21,59 +34,6 @@ This repo features a set of Docker images that we use for different purposes - f
 
 Documentation can be found [here](/docker/README.md)
 
-## Spring Boot app deployment in AWS Elastic Container Service
-
-This section contains a step-by-step guide to configuring a full ECS infrastructure and deployment process. 
-
-Deploying Spring Boot applications into AWS Elastic Container Service can be done simply by calling
-[spring-boot-deploy-ecs.sh](spring-boot-deploy-ecs.sh)
-
-However, it requires the app to be properly configured. To configure an existing app:
-
-1. Copy [buildspec-spring.yml](templates/ecs/buildspec-spring.yml) file into `deploy/configuration/buildspec-spring.yml` in your project.
-
-2. Copy [task-def.json](templates/ecs/task-def.json) file into `deploy/task-def.json` in your project.
-
-
-3. For each environment you need to define a script in `deploy` directory, named `<ENV>-Var-Build.sh`. This script will set the corresponding environment variables for the defined `ENV`. 
-Required vars that you need to define for each env:
-   1. `ECS_TASK_EXECUTION_ROLE`: The role that the ECS task instance will use.
-   2. `DOCKER_IMAGE`: The image of the container were the task instance will run (probably you will need to build an upload a custom image to aws ecr). In this case, we will probably use 
-   `docker-jar-runner`, check [Docker Images](docker/README.md) documentation
-   3. `AWS_REGION`: AWS region of the ECS cluster where the task will be deployed.
-   4. `S3_BUCKET_NAME`: S3 bucket where the generated jar will be uploaded.
-   5. `AWS_SECRET_MANAGER_SECRET_ARN`: Optional. Define this var if you need to use `secrets` section in task definition file. Example at the end of this section.
-
-   **Note:** You have a template in [ENV-Var-Build.sh](templates/ecs/ENV-Var-Build.sh)
-
-4. For each build project created in ECS you need to configure the following environment vars:
-   1. `ENV`: The environment (qa, prod, etc...).
-   2. `BRANCH`/`TAG`: branch/tag of the base code that will be used to perform the build, by default it will use master.
-   3. `SLACK_WEBHOOK_URL`: optional. Specify a slack webhook url if you need to send notification to Slack.
-   4. `KEY_ID`: KMS customer managed key to use to encrypt the build.
-   5. `SUBMODULE_BRANCH`: branch of the submodules base code that will be used to perform the build.
-   6. `APPS`: space separated string. Each value in this list along with the `ENV` value will be used to find and execute the configuration scripts for each jar that will be generated. More explanation below.
-
-5. For each `APP` defined in `APPS` var you need to define a script in `deploy` directory, named `<ENV>-<APP>.sh`. This script will set the corresponding environment variables for the defined `ENV` and `APP`. Required vars that you need to define for each env:
-   1. `MODULE_NAME`: module to be build.
-   2. `CLUSTER_NAME`: the name of the ECS cluster where the task will be deployed.
-   3. `VCPU`: The number of cpu units used by the task.
-   4. `MEMORY`: The amount (in MiB) of memory used by the task.
-   5. `SERVER_PORT`: port mapping for the container. Probably `8080`.
-
-   **Note:** You have a template in [ENV-APP.sh](templates/ecs/ENV-APP.sh)
-
-#### Example: Task definition secrets section
-   ```
-   ...
-   "secrets": [
-      {
-        "name": "DB_PASSWORD",
-        "valueFrom": "$AWS_SECRET_MANAGER_SECRET_ARN:db-password::"
-      }
-    ],
-   ...
-   ```
 ## React app deployment into S3 bucket
 
 This section contains a detailed guide on how to provision infrastructure for hosting a React app and serve it via a CDN. Let's start with the infrastructure
