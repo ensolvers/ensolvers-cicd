@@ -75,6 +75,11 @@ Parameters:
       - db.r5.2xlarge
     ConstraintDescription: "Must be a valid DB instance type."
 
+  14DBEngineVersion:
+    Description: "Engine version for the db cluster and the db instance. Update with the last version available otherwise the stack will fail with not found error"
+    Type: String
+    Default: 8.0.mysql_aurora.3.05.2
+
 Resources:
 
   InstanceBBSecurityGroup:
@@ -137,7 +142,7 @@ Resources:
       DatabaseName: !Ref 02DBName
       DBSubnetGroupName: !Ref MyDBSubnetGroup
       Engine: aurora-mysql
-      EngineVersion: '8.0.mysql_aurora.3.03.0'
+      EngineVersion: !Ref 14DBEngineVersion
       KmsKeyId: !Ref 09EncryptionKey
       MasterUsername: !Sub '{{resolve:secretsmanager:${MyRDSInstanceRotationSecret}::username}}'
       MasterUserPassword: !Sub '{{resolve:secretsmanager:${MyRDSInstanceRotationSecret}::password}}'
@@ -156,7 +161,7 @@ Resources:
       DBSubnetGroupName: !Ref MyDBSubnetGroup
       EnablePerformanceInsights: true
       Engine: aurora-mysql
-      EngineVersion: '8.0.mysql_aurora.3.03.0'
+      EngineVersion: !Ref 14DBEngineVersion
       PubliclyAccessible: false
       StorageEncrypted: true
       
