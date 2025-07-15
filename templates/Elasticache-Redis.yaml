@@ -4,14 +4,14 @@ Parameters:
   00RedisClusterName:
     Description: Name for the Redis Cache
     Type: String
-  
+
   01VPCId:
     Description: "VPC for the DB"
     Type: AWS::EC2::VPC::Id
 
   02SubnetRedis:
-    Description: "Subnet for the DB"
-    Type: AWS::EC2::Subnet::Id
+    Description: "Subnets for Redis (in different AZs)"
+    Type: List<AWS::EC2::Subnet::Id>
 
 Resources:
 
@@ -21,17 +21,16 @@ Resources:
       GroupDescription: SecurityGroup for Redis
       VpcId: !Ref 01VPCId
       SecurityGroupIngress:
-      - IpProtocol: tcp
-        FromPort: 0
-        ToPort: 6379
+        - IpProtocol: tcp
+          FromPort: 0
+          ToPort: 6379
 
   RedisSubnetGroup:
     Type: AWS::ElastiCache::SubnetGroup
     Properties:
       CacheSubnetGroupName: !Sub ${AWS::StackName}-SG
-      Description: !Sub Subnet Group for Redis
-      SubnetIds:
-        - !Ref 02SubnetRedis
+      Description: Subnet Group for Redis
+      SubnetIds: !Ref 02SubnetRedis
 
   RedisCache:
     Type: AWS::ElastiCache::CacheCluster
@@ -40,9 +39,10 @@ Resources:
       CacheSubnetGroupName: !Ref RedisSubnetGroup
       ClusterName: !Sub ${00RedisClusterName}
       Engine: redis
-      EngineVersion: 5.0.6
+      # Use lastest Redis version available in the region
+      EngineVersion: !Ref "AWS::NoValue"
       NumCacheNodes: 1
       Port: 6379
-      VpcSecurityGroupIds: 
+      VpcSecurityGroupIds:
         - !Ref RedisInstanceSecurityGroup
 
