@@ -1,0 +1,21 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "AllowSecretAccessForECS",
+      "Effect": "Allow",
+      "Action": [
+        "secretsmanager:GetSecretValue"
+      ],
+      "Resource": "<SECRETS_MANAGER_ARN>"
+    },
+    {
+      "Effect": "AllowS3BuildBucketAccess",
+      "Action": "s3:*",
+      "Resource": [
+        "<S3_BUILD_BUCKET>",
+        "<S3_BUILD_BUCKET>/*"
+      ]
+    }
+  ]
+}
