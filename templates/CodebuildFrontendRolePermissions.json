@@ -1,0 +1,23 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": "secretsmanager:GetSecretValue",
+      "Resource": "<SECRETS_MANAGER_ARN>"
+    },
+    {
+      "Effect": "Allow",
+      "Action": "s3:*",
+      "Resource": [
+        "<S3_BUILD_BUCKET>",
+        "<S3_BUILD_BUCKET>/*"
+      ]
+    },
+    {
+      "Effect": "Allow",
+      "Action": "cloudfront:CreateInvalidation",
+      "Resource": "<CLOUDFRONT_DISTRIBUTION_ARN>"
+    }
+  ]
+}
