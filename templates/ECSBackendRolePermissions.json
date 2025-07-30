@@ -10,7 +10,7 @@
       "Resource": "<SECRETS_MANAGER_ARN>"
     },
     {
-      "Effect": "AllowS3BuildBucketAccess",
+      "Effect": "Allow",
       "Action": "s3:*",
       "Resource": [
         "<S3_BUILD_BUCKET>",
