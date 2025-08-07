@@ -28,6 +28,13 @@ update_submodules() {
 
 find "$root_dir" -type f -name ".gitmodules" | while read -r file; do
     dir=$(dirname "$file")
+
+    # skip any .gitmodules under a node_modules directory
+    if [[ "$dir" == *node_modules* ]]; then
+        echo "Skipping submodule in node_modules: $dir"
+        continue
+    fi
+
     echo "Fetching submodule [$dir]..."
     if [[ -z $skip_cd_absolute_path ]]; then
       cd "$absolute_path"
